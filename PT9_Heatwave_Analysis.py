@@ -67,6 +67,68 @@ If these are all acceptable then I can say that my algorithm works well.
 '''
 
 
+'''
+Heatwaves_Finder Function
+'''
+#Need to apply a code that checks the things max heatwave then it has 2 days of min heatwave in the first 3 days
+CDP_Max = function_M.Calendar_Day_Percentile(Daily_MaxMin,90,7,Dates,'Max',1911,1940)
+Max_Heatwaves = function_M.Extend_Summer_Heatwaves_v2(Daily_MaxMin,True, 1911, 1940,'Max',CDP_Max,'date')
+#Min
+CDP_Min = function_M.Calendar_Day_Percentile(Daily_MaxMin,90,7,Dates,'Min',1911,1940)
+Min_Heatwaves = function_M.Extend_Summer_Heatwaves_v2(Daily_MaxMin,False, 1911, 1940,'Min',CDP_Min,'date')
+#Ave
+CDP_Ave = function_M.Calendar_Day_Percentile(Daily_MaxMin,90,7,Dates,'Ave',1911,1940)
+Ave_Heatwaves = function_M.Extend_Summer_Heatwaves_v2(Daily_MaxMin,True, 1911, 1940,'Ave',CDP_Ave,'date')
+
+
+#
+max(Max_Heatwaves['id'])
+
+
+id_Max = Max_Heatwaves['id'] 
+ids = id_Max.drop_duplicates( keep='first', inplace=False)
+   
+#%%
+Heatwave_Event = []
+Heatwave_Event_Min = []
+Heatwave_Event_Max = []
+for i in ids:
+   
+   Max_Event = Max_Heatwaves[Max_Heatwaves['id']==i]
+   Days = Max_Event['day'].reset_index()
+   Months = Max_Event['month'].drop_duplicates( keep='first', inplace=False).reset_index()
+   Years = Max_Event['year'].drop_duplicates( keep='first', inplace=False).reset_index()
+
+   Min_Event = Min_Heatwaves[Min_Heatwaves['day']>=Days['day'][0]]
+   Min_Event = Min_Event[Min_Heatwaves['day']<=Days['day'][len(Days)-1]]
+   Min_Event = Min_Event[Min_Heatwaves['month']>=Months['month'][0]]
+   Min_Event = Min_Event[Min_Heatwaves['month']<=Months['month'][len(Months)-1]]
+   Min_Event = Min_Event[Min_Heatwaves['year']>=Years['year'][0]]
+   Min_Event = Min_Event[Min_Heatwaves['year']<=Years['year'][len(Years)-1]]
+   
+
+   Percent = 100*len(Min_Event)/len(Max_Event)
+   length = len(Min_Event)
+   print((Percent,length))
+   
+   
+   
+#My Question is:
+#Should I do a new approach instead of 2 days of min heat I do 60% of mins must be in heatwave conditions  means it puts more emphasis on the longer heatwave and its actual impacts
+    
+                          
+
+
+
+
+
+
+
+
+
+
+
+
 
 
 
