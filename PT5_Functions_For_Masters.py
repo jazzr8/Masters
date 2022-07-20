@@ -274,8 +274,25 @@ def Extend_Summer_Heatwaves_v2(Dataset,Is_Max, Start_Year, End_Year,Column_Name_
     ext_sum_heatwave2 =  heatwave_df.loc[heatwave_df['month']<=3]
     Extended_Summer_Season = pd.concat([ext_sum_heatwave,ext_sum_heatwave2]).sort_values(by=['date'], ascending=True)
     
-    
-    
+    #Now I need to find 1/11 shit
+    id_Max = Extended_Summer_Season['id'] 
+    print(id_Max)
+    ids = id_Max.drop_duplicates( keep='first', inplace=False)
+    print(ids)
+    for i in ids:
+        
+        Check = Extended_Summer_Season[Extended_Summer_Season['id']==i]
+        LeftCheck = Check[Check['day']==1]
+        LeftCheck = LeftCheck[LeftCheck['month']==11]
+        print(LeftCheck)
+        RightCheck = Check[Check['day']==31]
+        RightCheck = RightCheck[LeftCheck['month']==3]
+        print(RightCheck)
+        if (len(LeftCheck == 1)):
+            Extended_Summer_Season = pd.concat([Extended_Summer_Season,heatwave_df[heatwave_df['id']==i]],replace = 'True').sort_values(by=['date'], ascending=True)   
+        elif (len(RightCheck == 1)):
+            Extended_Summer_Season = pd.concat([Extended_Summer_Season,heatwave_df[heatwave_df['id']==i]],replace = 'True').sort_values(by=['date'], ascending=True)
+        
     return(Extended_Summer_Season)
 
 
