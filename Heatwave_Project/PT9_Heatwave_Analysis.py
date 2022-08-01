@@ -71,11 +71,11 @@ If these are all acceptable then I can say that my algorithm works well.
 Heatwaves_Finder Function
 '''
 #Need to apply a code that checks the things max heatwave then it has 2 days of min heatwave in the first 3 days
-CDP_Max = function_M.Calendar_Day_Percentile(Daily_MaxMin,90,7,Dates,'Max',1911,1940)
-Max_Heatwaves = function_M.Extend_Summer_Heatwaves_v1(Daily_MaxMin,True, 1911, 1940,'Max',CDP_Max,'date')
+CDP_Max = function_M.Calendar_Day_Percentile(Daily_MaxMin,90,7,Dates,'Max',1941,1970)
+Max_Heatwaves = function_M.Extend_Summer_Heatwaves_v2(Daily_MaxMin,True, 1941, 1970,'Max',CDP_Max,'date')
 #Min
-CDP_Min = function_M.Calendar_Day_Percentile(Daily_MaxMin,90,7,Dates,'Min',1911,1940)
-Min_Heatwaves = function_M.Extend_Summer_Heatwaves_v1(Daily_MaxMin,False, 1911, 1940,'Min',CDP_Min,'date')
+CDP_Min = function_M.Calendar_Day_Percentile(Daily_MaxMin,90,7,Dates,'Min',1941,1970)
+Min_Heatwaves = function_M.Extend_Summer_Heatwaves_v2(Daily_MaxMin,False, 1941, 1970,'Min',CDP_Min,'date')
 #Ave
 #CDP_Ave = function_M.Calendar_Day_Percentile(Daily_MaxMin,90,7,Dates,'Ave',1911,1940)
 #Ave_Heatwaves = function_M.Extend_Summer_Heatwaves_v2(Daily_MaxMin,True, 1911, 1940,'Ave',CDP_Ave,'date')
@@ -92,38 +92,60 @@ ids = id_Max.drop_duplicates( keep='first', inplace=False)
 Heatwave_Event = []
 Heatwave_Event_Min = []
 Heatwave_Event_Max = []
+count = 1
 
 for i in ids:
    #This extracts the id from the Max_Event
+   #print(i)
    Max_Event = Max_Heatwaves[Max_Heatwaves['id']==i]
+   #print(Max_Event)
    #Finds the days, months and years from the max event to match with the minimum event.
    Days = Max_Event['day'].reset_index()
    Months = Max_Event['month'].drop_duplicates( keep='first', inplace=False).reset_index()
    Years = Max_Event['year'].drop_duplicates( keep='first', inplace=False).reset_index()
-   print(Days)
+   #print(Days)
    #Gets the Min event to see it if it within the bounds of the max event, it is actually the criteria
    #3 days and 2 nights,
    Min_Event = Min_Heatwaves[Min_Heatwaves['day']>=Days['day'][0]]
-   Min_Event = Min_Event[Min_Heatwaves['day']<=Days['day'][len(Days)-1]]
-   Min_Event = Min_Event[Min_Heatwaves['month']>=Months['month'][0]]
-   Min_Event = Min_Event[Min_Heatwaves['month']<=Months['month'][len(Months)-1]]
-   Min_Event = Min_Event[Min_Heatwaves['year']>=Years['year'][0]]
-   Min_Event = Min_Event[Min_Heatwaves['year']<=Years['year'][len(Years)-1]]
+   #print(Min_Event)
+   Min_Event = Min_Event[Min_Event['day']<=Days['day'][2]]
+   #print(Min_Event)
+   Min_Event = Min_Event[Min_Event['month']>=Months['month'][0]]
+   #print(Min_Event)
+   Min_Event = Min_Event[Min_Event['month']<=Months['month'][len(Months)-1]]
+   #print(Min_Event)
+   Min_Event = Min_Event[Min_Event['year']>=Years['year'][0]]
+   #print(Min_Event)
+   Min_Event = Min_Event[Min_Event['year']<=Years['year'][len(Years)-1]]
+   #print(Min_Event)
    
    #Checks the percentage and number of days within the event. The percentage is later
    
    
    Percent = 100*len(Min_Event)/len(Max_Event)
    length = len(Min_Event)
-   print((Percent,length))
+   #print((Percent,length))
    
    #Now extract the information for the period.
-   #if(length >= 2):
-     #Temperature = Daily_MaxMin[]  
-     
-     
-     
-     #count = count+1
+   if(length >= 2):
+       Temperature = Daily_MaxMin[Daily_MaxMin['day']>=Days['day'][0]]
+       #print(Min_Event)
+       Temperature = Temperature[Temperature['day']<=Days['day'][len(Days)-1]]
+       #print(Min_Event)
+       Temperature = Temperature[Temperature['month']>=Months['month'][0]]
+       #print(Min_Event)
+       Temperature = Temperature[Temperature['month']<=Months['month'][len(Months)-1]]
+       #print(Min_Event)
+       Temperature = Temperature[Temperature['year']>=Years['year'][0]]
+       #print(Min_Event)
+       Temperature = Temperature[Temperature['year']<=Years['year'][len(Years)-1]]
+       #print(Min_Event)
+
+       Temperature['id'] = [count] * len(Temperature)
+       count = count + 1
+       Heatwave_Event.append(Temperature)
+   Full_Heatwaves = pd.concat(Heatwave_Event,axis=0)
+
     # Heatwave = Heatwave_Characteristics_Onset.loc[i-heat_days:i-1]
     # Heatwave['id'] = [count] * len(Heatwave)
     # list_heatwaves.append(Heatwave)
