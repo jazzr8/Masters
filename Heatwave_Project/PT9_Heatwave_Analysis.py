@@ -72,7 +72,7 @@ Heatwaves_Finder Function
 '''
 #Need to apply a code that checks the things max heatwave then it has 2 days of min heatwave in the first 3 days
 CDP_Max = function_M.Calendar_Day_Percentile(Daily_MaxMin,90,7,Dates,'Max',1941,1970)
-Max_Heatwaves = function_M.Extend_Summer_Heatwaves_v2(Daily_MaxMin,True, 1941, 1970,'Max',CDP_Max,'date')
+Max_Heatwaves = function_M.Extend_Summer_Heatwaves_v1(Daily_MaxMin,True, 1941, 1970,'Max',CDP_Max,'date')
 #Min
 CDP_Min = function_M.Calendar_Day_Percentile(Daily_MaxMin,90,7,Dates,'Min',1941,1970)
 Min_Heatwaves = function_M.Extend_Summer_Heatwaves_v2(Daily_MaxMin,False, 1941, 1970,'Min',CDP_Min,'date')
@@ -162,8 +162,167 @@ for i in ids:
 
 
 
+#%%DEBUG CODE
+Is_Max = True
+Dataset = Daily_MaxMin
+date_title = 'date'
+Start_Year =1911
+End_Year = 1940
+Column_Name_Max_Min_Ave = 'Max'
+CDP = CDP_Max
+#We alrwady have the CPD data
+
+if (Is_Max == True):
+    Q_Threshold = 3
+else:
+    Q_Threshold = 2
+#Get
+import numpy as np, warnings, pandas as pd
+#Get 3 vectors of year month and day    
+Dataset['year'] =Dataset[date_title].dt.year
+Dataset['month']=Dataset[date_title].dt.month
+Dataset['day']  =Dataset[date_title].dt.day
+#Get the data into the year range we want
+Data = Dataset[Dataset['year'] <= End_Year]
+Data = Data[Data['year'] >= Start_Year-1]
+Data = Data.reset_index()
 
 
+
+#Define the excess heat factor vectors for max_min_ave
+#first day in focus is index 32
+EHF = []#np.zeros(len(Data))
+EHIacc = []#np.zeros(len(Data))
+EHIsig = []#np.zeros(len(Data))
+EHIacclpositive = []#np.zeros(len(Data)) #To Sim  max[1,EHIacc]
+EHFp= []#np.zeros(len(Data)) #To sim EHIsig*max[1,EHIacc]
+
+
+
+for i in np.arange(Data.index[0]+33,Data.index[len(Data)-1]):
+    #print(i)
+    #-----3 day mean-----#
+    D3mean = (Data[Column_Name_Max_Min_Ave][i] + Data[Column_Name_Max_Min_Ave][i-1]+Data[Column_Name_Max_Min_Ave][i-2])/3
+
+    #-----i-32 to i - 3-----#
+    D323SUM = 0
+    for q in range(3,33):
+        D323SUM = D323SUM + Data[Column_Name_Max_Min_Ave][i-q]
+        
+    D323mean = D323SUM/len(range(3,33))
+    #-----EHI(accl)-----#
+    EHIacc_single = D3mean - D323mean
+    EHIacc.append(EHIacc_single*1)
+    #print(EHIacc)
+    EHIacc_singlePOS = np.max([1,EHIacc_single])
+    
+    EHIacclpositive.append(EHIacc_singlePOS*1)
+
+    #-----Tn-----#
+    CDPsortd = CDP[CDP['day'] == Data['day'][i]]    
+    CDPsortm = CDPsortd[CDPsortd['month'] == Data['month'][i]]
+    CDPsortm.reset_index()
+    Index = CDPsortm.index[0]
+    T_CDP = CDPsortm['Temp'][Index]
+    #print(T_CDP)
+    #-----EHI(sig) -----#
+    EHIsig_single = D3mean - T_CDP
+    EHIsig.append(EHIsig_single)
+    
+    #-----EHF -----#
+    EHF.append(EHIacc_single* EHIsig_single) #degC^2
+    EHFp.append(np.max([1,EHIacc_single]) * EHIsig_single)
+    
+
+
+EHF = pd.DataFrame(EHF,columns=['Excess Heat Factor'])
+EHIacc = pd.DataFrame(EHIacc,columns=['Excess Heat Index Acclimatised'])
+EHIsig = pd.DataFrame(EHIsig,columns=['Excess Heat Index Significant'])
+EHIacclpositive = pd.DataFrame(EHIacclpositive,columns=['Excess Heat Index Acclimatised Maximum Will Always be Positive'])
+EHFp = pd.DataFrame(EHFp,columns=["Excess Heat Factor Positive For Continuation of Long Heatwaves"])
+
+
+#EHIacc = pd.Series(EHIacc,name="Excess Heat Index Acclimatised")
+
+#EHFp = pd.concat(EHFp,axis=0)
+#EHFp = EHFp.to_frame(name="Excess Heat Factor Positive For Continuation of Long Heatwaves")
+
+
+
+
+ForDates = np.arange(Data.index[0]+33,Data.index[len(Data)-1])
+
+DateData = Data['date']
+DateData = DateData[DateData.index>= Data.index[0]+34]
+DD = DateData.reset_index()
+
+#Need to add dates
+
+
+
+EHFvect = pd.concat([DD, EHIacc,EHIacclpositive,EHIsig,EHF,EHFp],axis=1)
+Heatwave_Characteristics_Onset = pd.merge(Data,EHFvect,how='right',on = ['date'])
+
+#This doesn't work cause it is not positive we know it does work, but now I have relaised that a addition does not work so I stuffed up, now I need to implement the onset of the 
+#heatwave as the first three days where both EHI are positve, and once this is checked, let the subsequent daysave the EHIaccl as max[1,EHIaccl[i]] so itll most likely be 
+#3 or 4 if loops to extract the heatwave event.]
+
+
+list_heatwaves = []
+heat_days = 0
+count  = 0
+for i in range(len(EHF)):
+    #Define the heat_days>= 3 for long heatwave periods
+    if (heat_days >= 3):
+        #Define the heatwave continuation
+        if(EHFvect['Excess Heat Index Significant'][i] > 0):
+            heat_days = heat_days + 1
+        #Define the ending of the heatwave, without the break at the moment
+        else:
+            count = count+1
+            Heatwave = Heatwave_Characteristics_Onset.loc[i-heat_days:i-1]
+            Heatwave['id'] = [count] * len(Heatwave)
+            list_heatwaves.append(Heatwave)
+            heat_days=0
+        
+    #Define everything for the initiation of the heatwave
+    else:
+        if((EHFvect['Excess Heat Index Acclimatised'][i]> 0) and (EHFvect['Excess Heat Index Significant'][i] > 0)):
+            heat_days = heat_days + 1
+        else:
+            heat_days  = 0
+            
+heatwave_df = pd.concat(list_heatwaves,axis=0)
+print(heatwave_df)
+
+ext_sum_heatwave = (heatwave_df.loc[heatwave_df['month']>=11])
+ext_sum_heatwave2 =  heatwave_df.loc[heatwave_df['month']<=3]
+Extended_Summer_Season = pd.concat([ext_sum_heatwave,ext_sum_heatwave2]).sort_values(by=[date_title], ascending=True)
+
+#Now I need to find 1/11 shit
+id_Max = Extended_Summer_Season['id'] 
+ids = id_Max.drop_duplicates( keep='first', inplace=False)
+
+
+
+for i in ids:
+    CheckL = Extended_Summer_Season[Extended_Summer_Season['id']==i]
+    LeftCheck = CheckL[CheckL['day']==1]
+    LeftCheck = LeftCheck[LeftCheck['month']==11]
+    #print(LeftCheck)
+    CheckR = Extended_Summer_Season[Extended_Summer_Season['id']==i]
+    RightCheck = CheckR[CheckR['day']==31]
+    RightCheck = RightCheck[RightCheck['month']==3]
+    #print(RightCheck)
+    if (len(LeftCheck) == 1):
+        Extended_Summer_Season = pd.concat([Extended_Summer_Season,heatwave_df[heatwave_df['id']==i]]).sort_values(by=[date_title], ascending=True)   
+        #print(1)
+    elif (len(RightCheck) == 1):
+        Extended_Summer_Season = pd.concat([Extended_Summer_Season,heatwave_df[heatwave_df['id']==i]]).sort_values(by=[date_title], ascending=True)
+Extended_Summer_Season.drop_duplicates(subset = [date_title],keep='first')
+
+
+#Have fixed now need to check if it runs properly and if the values are matching up within it because I can generate hheatwaves.
 
 
 

@@ -192,10 +192,36 @@ print(Percent_days_above_non_CC)
 print(Stats_Diff)
 
 #%%Now a dsitribution for the 90% and 95% 
-Dist1 = MaxT_1910_1940['maximum temperature (degC)']
-Dist2 = MaxT_1990_2020['maximum temperature (degC)']
 
 
+# Apply datetime
+MaxT_1910_1940['date'] = pd.to_datetime(MaxT_1910_1940['date'],format="%d/%m/%Y")
+
+# Apply groupby functiom
+MaxT_1910_1940['year']=MaxT_1910_1940['date'].dt.year
+MaxT_1910_1940['month']=MaxT_1910_1940['date'].dt.month
+MaxT_1910_1940['day']=MaxT_1910_1940['date'].dt.day
+
+Dist1 = (MaxT_1910_1940.loc[MaxT_1910_1940['month']>=11])
+Dist12 =  MaxT_1910_1940.loc[MaxT_1910_1940['month']<=3]
+Dist1 = pd.concat([Dist1,Dist12]).sort_values(by=['date'], ascending=True)
+Dist1 = Dist1['maximum temperature (degC)'][~np.isnan(Dist1['maximum temperature (degC)'])]
+# Apply datetime
+MaxT_1990_2020['date'] = pd.to_datetime(MaxT_1990_2020['date'],format="%d/%m/%Y")
+
+# Apply groupby functiom
+MaxT_1990_2020['year']=MaxT_1990_2020['date'].dt.year
+MaxT_1990_2020['month']=MaxT_1990_2020['date'].dt.month
+MaxT_1990_2020['day']=MaxT_1990_2020['date'].dt.day
+
+Dist2 = (MaxT_1990_2020.loc[MaxT_1990_2020['month']>=11])
+Dist22 =  MaxT_1990_2020.loc[MaxT_1990_2020['month']<=3]
+Dist2 = pd.concat([Dist2,Dist22]).sort_values(by=['date'], ascending=True)
+Dist2 = Dist2['maximum temperature (degC)'][~np.isnan(Dist2['maximum temperature (degC)'])]
+
+
+xmin = min(min(Dist1),min(Dist2))
+xmax =max(max(Dist1),max(Dist2))
 
 import numpy as np
 from scipy.stats import norm,gamma
@@ -203,22 +229,63 @@ import matplotlib.pyplot as plt
 
 plt.figure(6)
 # Generate some data for this demonstration.
-Dist1 = Ave_T_Perth['Average Temp'][~np.isnan(Ave_T_Perth['Average Temp'])]
-data1 = Dist1
 
 # Fit a normal distribution to the data:
-a1, a2, a3 = gamma.fit(data1)
+a1, a2 = norm.fit(Dist1)
 
 # Plot the histogram.
-plt.hist(data1, bins=25, density=True, alpha=0.6, color='g')
+#plt.hist(Dist1, bins=25, density=True, alpha=0.6, color='g')
+
+# Plot the PDF.
+#xmin, xmax = plt.xlim()
+x1 = np.linspace(xmin, xmax, 100)
+p1 = norm.pdf(x1,a1, a2)
+plt.plot(x1, p1, 'k', linewidth=2,color ='black',label = '1910-1940')
+#title = "Fit results: mu = %.2f,  std = %.2f" % (mu1, std1)
+#plt.title(title)
+
+
+
+
+
+# Fit a normal distribution to the data:
+a4, a5 = norm.fit(Dist2)
+
+# Plot the histogram.
+#plt.hist(Dist2, bins=25, density=True, alpha=0.6, color='g')
 
 # Plot the PDF.
 xmin, xmax = plt.xlim()
-x1 = np.linspace(xmin, xmax, 100)
-p1 = gamma.pdf(x1,a1, a2,a3)
-plt.plot(x1, p1, 'k', linewidth=2)
+p2 = norm.pdf(x1,a4, a5)
+plt.plot(x1, p2, 'k', linewidth=2,color ='red',label = '1990-2020')
 #title = "Fit results: mu = %.2f,  std = %.2f" % (mu1, std1)
 #plt.title(title)
+#plt.hist(Dist2, bins=25, density=True, alpha=0.6, color='g')
+plt.title('Perth Maximum Temperature Distribution (Nov-Mar)')
+plt.legend()
+#In conclusion within the extended summer, the normal distubtion of maximum days has only shifted around 1.8C warmer with no change in variance.
+#This means that there is no indication that cold spells are getting colder and more extreme it is that the chance of a cold spell
+#is less liekly and the chance of a heatwave is more likely.
+#%%
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+##This does
+
+
 
 plt.show()
 
@@ -265,4 +332,4 @@ plt.plot(x2, p2, 'k', linewidth=2)
 
 
 
-So the temperature record fits a gamma plot. it is intere
+#So the temperature record fits a gamma plot. it is intere
