@@ -169,6 +169,7 @@ date_title = 'date'
 Start_Year =1911
 End_Year = 1940
 Column_Name_Max_Min_Ave = 'Max'
+CDP_Max = function_M.Calendar_Day_Percentile(Daily_MaxMin,90,7,Dates,'Max',1911,1940)
 CDP = CDP_Max
 #We alrwady have the CPD data
 
@@ -206,10 +207,10 @@ for i in np.arange(Data.index[0]+33,Data.index[len(Data)-1]):
 
     #-----i-32 to i - 3-----#
     D323SUM = 0
-    for q in range(3,33):
+    for q in range(3,32):
         D323SUM = D323SUM + Data[Column_Name_Max_Min_Ave][i-q]
         
-    D323mean = D323SUM/len(range(3,33))
+    D323mean = D323SUM/30
     #-----EHI(accl)-----#
     EHIacc_single = D3mean - D323mean
     EHIacc.append(EHIacc_single*1)
@@ -249,11 +250,11 @@ EHFp = pd.DataFrame(EHFp,columns=["Excess Heat Factor Positive For Continuation 
 
 
 
-
-ForDates = np.arange(Data.index[0]+33,Data.index[len(Data)-1])
+#Match the dates up
+ForDates = np.arange(Data.index[0]+32,Data.index[len(Data)-1])
 
 DateData = Data['date']
-DateData = DateData[DateData.index>= Data.index[0]+34]
+DateData = DateData[DateData.index>= Data.index[0]+32]
 DD = DateData.reset_index()
 
 #Need to add dates
@@ -323,6 +324,194 @@ Extended_Summer_Season.drop_duplicates(subset = [date_title],keep='first')
 
 
 #Have fixed now need to check if it runs properly and if the values are matching up within it because I can generate hheatwaves.
+
+#As suspected my code is off by a bit great now how to figure out where things go where...
+
+
+
+
+
+#%%
+'''
+Heatwaves Version 3
+
+'''
+
+#%%Functions Extra
+
+
+    
+    
+    
+    
+    
+    
+    
+    
+    
+ 
+
+
+#What we need
+'''Max Temp or Min Temp'''
+Is_Max_T = True
+'''Dataset To be Used adn the date column'''
+Dataset = Daily_MaxMin
+date_title = 'date'
+#For the test 
+Data = Dataset
+'''Start and end Years for the values to use
+Start Year will be Nov - 1911 to Mar - 1942
+I will classify a year heatwave as the 1911 season as Nov-1911 to Mar-1912
+
+Years to be excluded from the data:
+1910 and 2021 as these are incomplete
+
+In the 1880-1900
+This will be a different
+'''
+Start_Year = 1911
+End_Year = 1940
+
+'''Name of COlumn that is to be used to extract the temperatures defined by Is_Max_T'''
+Column_Name = 'Max'
+
+'''Date Name so we can split it into day month and year'''
+
+'''For the Excess Heat Significant Need to Use the CDP function defined beforehand'''
+CDP_Max = function_M.Calendar_Day_Percentile(Daily_MaxMin,90,7,Dates,'Max',1911,1940)
+CDP = CDP_Max
+CDPColumn_Name = 'Temp'
+
+#---------------------------#
+'''
+Now the Function Itself
+'''
+'''
+This is to determine the initiation of the heatwave for the Max and Min temperatures.
+
+The basic theory is that the beginning of a heatwave for Australia and Perth should be:
+    3 days Max Temp of above average temps
+    2 days Min Temp of above average temps
+'''
+Q_Threshold = function_M.Is_Max_Temp(Is_Max_T)
+
+'''
+Now to split the date up into sections day, month and year.
+Using loc[] so I don't think this matters anymore'
+'''
+#Data = function_M.Date_Splitter(Dataset,'date')
+
+'''
+Now with the Dataset we can define the 33 days. To make it easier get the previous 33 days before Nov for the start period.
+'''
+Data = Data.set_index(['date'])
+
+Day_S = 29
+Month_S = 9
+Year_S = Start_Year
+
+Day_E = 31
+Month_E = 3
+Year_E = End_Year+1
+
+Data_Range = Data.loc['{}-{}-{}'.format(Year_S,Month_S,Day_S):'{}-{}-{}'.format(Year_E,Month_E,Day_E)]
+
+#Data = subset(Data, date > as.Date("29-09-1911") )
+
+
+
+
+'''
+Now developing the first part of the function which will be its own function, the Excess Heat Factor.
+
+Ive realeased that I can save tiem and remove the EHI positive and EHFp as the EHIacc, EHIsig are only needed in the rest of the function.
+I will have EHF avalaible to be used though.
+
+In order for this to work properly we will have to reset index.
+'''
+Data_Range = Data_Range.reset_index()
+'''This is an index range of 0 to length-1'''
+
+
+EHF = function_M.Excess_Heat_Factor_Function(Data_Range,date_title,Column_Name,CDP,CDPColumn_Name)
+
+
+
+
+#---- Now to Extract the Heatwaves -------#
+'''Lets create a few lists essential for the Heatwaves and count functions'''
+list_heatwaves = []
+heat_days = 0
+count  = 0
+
+'''The first for loop is essentially checking to see if the day in focus is classified as a heatwave day, and the 
+onset is for 3 or more days.'''
+
+
+np.arange(1,40)
+Data.index[0]+33,len(Data)-1
+
+
+function_M.Date_Splitter(Data_Range.loc[33],'date')
+
+
+
+
+
+#%%
+Heatwave_Event = []
+Heatwave_Event_Min = []
+Heatwave_Event_Max = []
+count = 1
+
+for i in ids:
+   #This extracts the id from the Max_Event
+   Max_Event = Max_Heatwaves[Max_Heatwaves['id']==i]
+   #Finds the days, months and years from the max event to match with the minimum event.
+   Days = Max_Event['day'].reset_index()
+   Months = Max_Event['month'].drop_duplicates( keep='first', inplace=False).reset_index()
+   Years = Max_Event['year'].drop_duplicates( keep='first', inplace=False).reset_index()
+   #Gets the Min event to see it if it within the bounds of the max event, it is actually the criteria
+   #3 days and 2 nights,
+   Min_Event = Min_Heatwaves[Min_Heatwaves['day']>=Days['day'][0]]
+   Min_Event = Min_Event[Min_Event['day']<=Days['day'][2]]
+   Min_Event = Min_Event[Min_Event['month']>=Months['month'][0]]
+   Min_Event = Min_Event[Min_Event['month']<=Months['month'][len(Months)-1]]
+   Min_Event = Min_Event[Min_Event['year']>=Years['year'][0]]
+   Min_Event = Min_Event[Min_Event['year']<=Years['year'][len(Years)-1]]
+   
+   
+   #Checks the percentage and number of days within the event. The percentage is later
+   
+   
+   Percent = 100*len(Min_Event)/len(Max_Event)
+   length = len(Min_Event)
+   #print((Percent,length))
+   
+   #Now extract the information for the period.
+   if(length >= 2):
+       Temperature = Daily_MaxMin[Daily_MaxMin['day']>=Days['day'][0]]
+       #print(Min_Event)
+       Temperature = Temperature[Temperature['day']<=Days['day'][len(Days)-1]]
+       #print(Min_Event)
+       Temperature = Temperature[Temperature['month']>=Months['month'][0]]
+       #print(Min_Event)
+       Temperature = Temperature[Temperature['month']<=Months['month'][len(Months)-1]]
+       #print(Min_Event)
+       Temperature = Temperature[Temperature['year']>=Years['year'][0]]
+       #print(Min_Event)
+       Temperature = Temperature[Temperature['year']<=Years['year'][len(Years)-1]]
+       #print(Min_Event)
+
+       Temperature['id'] = [count] * len(Temperature)
+       count = count + 1
+       Heatwave_Event.append(Temperature)
+   Full_Heatwaves = pd.concat(Heatwave_Event,axis=0)
+
+
+
+
 
 
 

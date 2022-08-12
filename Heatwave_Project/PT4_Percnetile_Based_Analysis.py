@@ -195,6 +195,8 @@ print(Stats_Diff)
 
 MaxT_1911_1940 = MaxT_Perth[366:11323]
 MaxT_1991_2020 =MaxT_Perth[29586:40543]
+#MaxT_1911_1940 = MaxT_Perth[304:821]
+#MaxT_1991_2020 =MaxT_Perth[29524:30040]
 # Apply datetime
 MaxT_1911_1940['date'] = pd.to_datetime(MaxT_1911_1940['date'],format="%d/%m/%Y")
 
@@ -437,6 +439,9 @@ MaxT_1991_2020['year']=MaxT_1991_2020['date'].dt.year
 np.mean(Dist1)
 np.mean(Dist2)
 #%%minimum variant
+
+MinT_1911_1940 = MinT_Perth[304:821]
+MinT_1991_2020 =MinT_Perth[29524:30040]
 
 MinT_1911_1940 = MinT_Perth[366:11323]
 MinT_1991_2020 =MinT_Perth[29586:40543]
