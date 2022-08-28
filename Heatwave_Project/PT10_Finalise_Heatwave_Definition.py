@@ -47,10 +47,14 @@ Average = pd.Series(AveT_Perth,name="Ave")
 #The Daily Max Min Ave Data
 Daily_MaxMin = pd.concat([MaxT_Perth['date'],Maximum,Minimum,Average],axis=1)
 
-'''Expand date
-Since we want to use the day, month and year individually we need to expand these
-'''
 
+
+
+Heatwave = function_M.Heatwave_Function_Perth(Daily_MaxMin,'date',[1911,2020], [1911,1940],['Max','Min'],90,7,Dates)
+
+
+
+#%%
 # Apply datetime
 Daily_MaxMin['date'] = pd.to_datetime(Daily_MaxMin['date'],format="%d/%m/%Y")
 DMN = Daily_MaxMin
@@ -98,71 +102,17 @@ Column_Name = 'Max'
 
 '''For the Excess Heat Significant Need to Use the CDP function defined beforehand'''
 CDP_Max = function_M.Calendar_Day_Percentile(Daily_MaxMin,90,7,Dates,'Max',1911,1940)
-CDP = CDP_Max
+CDP_Min = function_M.Calendar_Day_Percentile(Daily_MaxMin,90,7,Dates,'Min',1911,1940)
+CDP = pd.concat([CDP_Max['date'],CDP_Max['Temp'],CDP_Min['Temp']],axis=1)
+
 CDPColumn_Name = 'Temp'
 #%%
 
 '''Now to put all the heatwave values together to get the 3 Max 2 Min heatwave definition'''
-Heatwaves_Max = function_M.Perth_Heatwaves_Max_Or_Min(True,DMN,'date',1911 ,2020 ,'Max',CDP,'Temp')
-Heatwaves_Min = function_M.Perth_Heatwaves_Max_Or_Min(False,DMN,'date',1911 ,2020 ,'Max',CDP,'Temp')
+Heatwaves_Max = function_M.Perth_Heatwaves_Max_Or_Min(True,DMN,'date',1911 ,2020 ,'Max',CDP_Max,'Temp')
+Heatwaves_Min = function_M.Perth_Heatwaves_Max_Or_Min(False,DMN,'date',1911 ,2020 ,'Min',CDP_Min,'Temp')
 
-
-
-#%%To get the proper definition of a heatwave.
-
-Max = function_M.Date_Splitter(Heatwaves_Max,'date')
-Min = function_M.Date_Splitter(Heatwaves_Min,'date')
-
-Heatwave_Event = []
-Heatwave_Event_Min = []
-Heatwave_Event_Max = []
-count = 1
-ids = Max['id'].drop_duplicates( keep='first', inplace=False)
-
-for i in ids:
-   #This extracts the id from the Max_Event
-   Max_Event = Max[Max['id']==i]
-   #Finds the days, months and years from the max event to match with the minimum event.
-   Days = Max_Event['day'].reset_index()
-   Months = Max_Event['month'].drop_duplicates( keep='first', inplace=False).reset_index()
-   Years = Max_Event['year'].drop_duplicates( keep='first', inplace=False).reset_index()
-   #Gets the Min event to see it if it within the bounds of the max event, it is actually the criteria
-   #3 days and 2 nights,
-   Min_Event = Min[Min['day']>=Days['day'][0]]
-   Min_Event = Min_Event[Min_Event['day']<=Days['day'][2]]
-   Min_Event = Min_Event[Min_Event['month']>=Months['month'][0]]
-   Min_Event = Min_Event[Min_Event['month']<=Months['month'][len(Months)-1]]
-   Min_Event = Min_Event[Min_Event['year']>=Years['year'][0]]
-   Min_Event = Min_Event[Min_Event['year']<=Years['year'][len(Years)-1]]
-   
-   
-   #Checks the percentage and number of days within the event. The percentage is later
-   
-   
-   Percent = 100*len(Min_Event)/len(Max_Event)
-   length = len(Min_Event)
-   #print((Percent,length))
-   
-   #Now extract the information for the period.
-   if(length >= 2):
-       Temperature = Daily_MaxMin[Daily_MaxMin['day']>=Days['day'][0]]
-       #print(Min_Event)
-       Temperature = Temperature[Temperature['day']<=Days['day'][len(Days)-1]]
-       #print(Min_Event)
-       Temperature = Temperature[Temperature['month']>=Months['month'][0]]
-       #print(Min_Event)
-       Temperature = Temperature[Temperature['month']<=Months['month'][len(Months)-1]]
-       #print(Min_Event)
-       Temperature = Temperature[Temperature['year']>=Years['year'][0]]
-       #print(Min_Event)
-       Temperature = Temperature[Temperature['year']<=Years['year'][len(Years)-1]]
-       #print(Min_Event)
-
-       Temperature['id'] = [count] * len(Temperature)
-       count = count + 1
-       Heatwave_Event.append(Temperature)
-   Full_Heatwaves = pd.concat(Heatwave_Event,axis=0)
-
+A =  function_M.Proper_Heatwaves_Perth(Daily_MaxMin,  function_M.Perth_Heatwaves_Max_Or_Min(True,DMN,'date',1911 ,2020 ,'Max',CDP_Max,'Temp'),  function_M.Perth_Heatwaves_Max_Or_Min(False,DMN,'date',1911 ,2020 ,'Min',CDP_Min,'Temp'),  'date')
 
 
 #So 2 days only are occurring and I believe it is to do with the break 
@@ -171,6 +121,29 @@ for i in ids:
 #value so it pulls it out.
 
 
+
+#%% Add CDP
+
+CDP_IND_0 = function_M.Date_Splitter(CDP, 'date')
+CDP_HW = []
+ids = A['id'].drop_duplicates( keep='first', inplace=False)
+
+for i in ids:
+    Event = A[A['id']==i]
+    Days = Event['day'].reset_index()
+    Months = Event['month'].drop_duplicates( keep='first', inplace=False).reset_index()
+    Years = Event['year'].drop_duplicates( keep='first', inplace=False).reset_index()
+    
+    CDP_IND = CDP_IND_0[CDP_IND_0['day']>=Days['day'][0]]
+    CDP_IND = CDP_IND[CDP_IND['day']<=Days['day'][len(Days)-1]]
+    CDP_IND = CDP_IND[CDP_IND['month']>=Months['month'][0]]
+    CDP_IND = CDP_IND[CDP_IND['month']<=Months['month'][len(Months)-1]]
+    
+    CDP_HW.append(CDP_IND)
+
+CDP_FOR_HW = pd.concat(CDP_HW,axis=0)
+
+Heatwave_event = pd.concat([A,CDP_FOR_HW['Temp']],axis=0)
 
 
 

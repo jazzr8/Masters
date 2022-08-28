@@ -300,7 +300,7 @@ def Extend_Summer_Heatwaves_v2(Dataset,Is_Max, Start_Year, End_Year,Column_Name_
 
 
 #%%
-def Calendar_Day_Percentile(Data,percentile,window,Dates,Column_Name,start_year,end_year):
+def Calendar_Day_Percentile(Data,percentile,window,Dates,Column_Name,start_year,end_year,temp):
     import numpy as np, warnings, pandas as pd
     Data = Data[Data['year'] <= end_year]
     Data = Data[Data['year'] >= start_year-1]
@@ -318,7 +318,7 @@ def Calendar_Day_Percentile(Data,percentile,window,Dates,Column_Name,start_year,
             
     #Now use CDP 15 day  for the max
     CalendarDay = TnX_Rolling(window, Daily_Data, percentile)
-    CDP = pd.DataFrame(CalendarDay, columns = ['Temp'])
+    CDP = pd.DataFrame(CalendarDay, columns = [temp])
     CDP = pd.concat([Dates,CDP],axis=1)
     CDP['date'] = pd.to_datetime(CDP['date'],format="%d/%m/%Y")
     CDP['year']=CDP['date'].dt.year
@@ -386,7 +386,8 @@ def Excess_Heat_Factor_Function(Data,date_title,Column_Name,CDP,CDPColumn_Name):
 
     Returns
     -------
-    The threshold in order to be a heatwave.
+    The threshold in order to be a heatwave.  Of heatwave events, that cause humans discomfort. So skips first hot day and 
+    has last day as of a lag effect of heat-related health problems.
 
     '''
     import numpy as np ,pandas as pd
@@ -433,10 +434,7 @@ def Excess_Heat_Factor_Function(Data,date_title,Column_Name,CDP,CDPColumn_Name):
     EHIacc = pd.DataFrame(EHIacc,columns=['Excess Heat Index Acclimatised'])
     EHIsig = pd.DataFrame(EHIsig,columns=['Excess Heat Index Significant'])
     Date_Value = pd.DataFrame(Date_Value,columns=[date_title])
-    print(EHF)
-    print(EHIacc)
-    print(EHIsig)
-    print(Date_Value)
+
     EHFvect = pd.concat([Date_Value, EHIacc, EHIsig, EHF],axis=1)
     Excess_Heat_Factor_Matrix = pd.merge(Data,EHFvect,how='right',on = [date_title])
     
@@ -544,6 +542,7 @@ def hot_period_Classification_Perth(EHF,Q):
             '''
             Now this is the criteria for the start of a hot period event, 3 max or 2 min.
             '''
+            break_days = 0
             #Define everything for the initiation of the hot period
             if((EHF['Excess Heat Index Acclimatised'][dt]> 0) and (EHF['Excess Heat Index Significant'][dt] > 0)):
                 heat_days = heat_days + 1
@@ -641,7 +640,10 @@ def Perth_Heatwaves_Max_Or_Min(Is_Max_T,Data,date_title,Start_Year ,End_Year ,Co
     '''This is an index range of 0 to length-1'''
 
     ''' This is the Excess Heat Factor Function, developed by Nairn 2009'''
-    EHF = Excess_Heat_Factor_Function(Data_Range,date_title,Column_Name,CDP,CDPColumn_Name)
+    #Heatwaves events using a lag for heat-related health issues.
+    #EHF = Excess_Heat_Factor_Function(Data_Range,date_title,Column_Name,CDP,CDPColumn_Name)
+    #Heatwave events full
+    EHF = Excess_Heat_Factor_Function_v2(Data_Range,date_title,Column_Name,CDP,CDPColumn_Name)
 
     '''These are the hot periods which is not heatwaves but these are the hotter then average periods developed
     by the EHF.
@@ -652,9 +654,216 @@ def Perth_Heatwaves_Max_Or_Min(Is_Max_T,Data,date_title,Start_Year ,End_Year ,Co
     Heatwaves_Max_Or_Min = Heatwaves_Defined(Hot_Periods,date_title)
 
 
-    return(Heatwaves_Max_Or_Min)
+    return(Heatwaves_Max_Or_Min, EHF)
+
+#%%The Heatwaves Perth
+def Proper_Heatwaves_Perth(Data,Heatwave_MaxT,Heatwave_MinT,date_name):
+    '''
+    Data: Dataframe
+        This is the daily maximum and minimum temperatures.
+    
+    Max_Heatwave: Dataframe
+        List of all heatwaves within the maxmimum temperature.
+    
+    Min_Heatwave: Dataframe
+        List of all heatwaves within the minimum temperature
+        
+    date_name: string
+        Name of column that you have for heatwave
+        
+    Output: Full_Heatwaves
+        This is the full heatwave list using the 3 max and 2 min definition of heatwaves. This only has the maximum and minimum, CDP,
+        and ... may have to add more.
+    
+    
+    
+    
+    
+    
+    
+    '''
+    import pandas as pd
+    
+    Max = Date_Splitter(Heatwave_MaxT,date_name)
+    Min = Date_Splitter(Heatwave_MinT,date_name)
+
+    Heatwave_Event = []
+    Heatwave_Event_Min = []
+    Heatwave_Event_Max = []
+    count = 1
+    ids = Max['id'].drop_duplicates( keep='first', inplace=False)
+
+    for i in ids:
+       #This extracts the id from the Max_Event
+       Max_Event = Max[Max['id']==i]
+       #Finds the days, months and years from the max event to match with the minimum event.
+       Days = Max_Event['day'].reset_index()
+       Months = Max_Event['month'].drop_duplicates( keep='first', inplace=False).reset_index()
+       Years = Max_Event['year'].drop_duplicates( keep='first', inplace=False).reset_index()
+       #Gets the Min event to see it if it within the bounds of the max event, it is actually the criteria
+       #3 days and 2 nights,
+       Min_Event = Min[Min['day']>=Days['day'][0]]
+       Min_Event = Min_Event[Min_Event['day']<=Days['day'][2]]
+       Min_Event = Min_Event[Min_Event['month']>=Months['month'][0]]
+       Min_Event = Min_Event[Min_Event['month']<=Months['month'][len(Months)-1]]
+       Min_Event = Min_Event[Min_Event['year']>=Years['year'][0]]
+       Min_Event = Min_Event[Min_Event['year']<=Years['year'][len(Years)-1]]
+       
+       
+       #Checks the percentage and number of days within the event. The percentage is later
+       
+       
+       Percent = 100*len(Min_Event)/len(Max_Event)
+       length = len(Min_Event)
+       #print((Percent,length))
+       
+       #Now extract the information for the period.
+       if(length >= 2):
+           Temperature = Data[Data['day']>=Days['day'][0]]
+           Temperature = Temperature[Temperature['day']<=Days['day'][len(Days)-1]]
+           Temperature = Temperature[Temperature['month']>=Months['month'][0]]
+           Temperature = Temperature[Temperature['month']<=Months['month'][len(Months)-1]]
+           Temperature = Temperature[Temperature['year']>=Years['year'][0]]
+
+           Temperature = Temperature[Temperature['year']<=Years['year'][len(Years)-1]]
+
+           Temperature['id'] = [count] * len(Temperature)
+           count = count + 1
+           Heatwave_Event.append(Temperature)
+           
+    Full_Heatwaves = pd.concat(Heatwave_Event,axis=0)
+      
+    return(Full_Heatwaves)
+
+
+#%% THE HEATWAVE FUNCTION
+def Heatwave_Function_Perth(Dataset,date_name,Time_In_Focus, CDP_Time_In_Focus,Temperature_Record_Title,percentile,window,Dates):
+    '''
+    Dataset:
+        
+    date_name: 'date'
+        Date Name so we can split it into day month and year
+    
+    Time_In_Focus: [Start,End]
+        Years to be excluded from the data-1910 and 2021 as these are incomplete
+        
+    CDP_Time_In_Focus: [Start,End]
+        
+    Temperature_Record_Title: ['Max','Min']
+        Name of COlumn that is to be used to extract the temperatures defined by Is_Max_T
+        
+    percentile: 
+        
+    window: 
+        
+    Dates:
+    '''
+    
+    import pandas as pd
+    # Apply datetime to the dataset
+    Dataset[date_name] = pd.to_datetime(Dataset[date_name],format="%d/%m/%Y")
+    
+    #2 versions of the dataset due to functions requiring different versions.
+    Data_not_expand = Dataset
+    Dataset = Date_Splitter(Dataset, date_name)
+    
+    '''Max Temp or Min Temp'''
+    Is_Max_T = [True,False]
+    
+    
+
+    '''Start and end Years for the values to use
+    Start Year will be Nov - 1911 to Mar - 1942
+    I will classify a year heatwave as the 1911 season as Nov-1911 to Mar-1912
+
+    Years to be excluded from the data:
+    1910 and 2021 as these are incomplete
+
+    In the 1880-1900
+    This will be a different
+    '''
+
+    '''For the Excess Heat Significant Need to Use the CDP function defined beforehand'''
+    CDP_Max = Calendar_Day_Percentile(Dataset,percentile,window,Dates,Temperature_Record_Title[0],CDP_Time_In_Focus[0],CDP_Time_In_Focus[1],'Temp Max')
+    CDP_Min = Calendar_Day_Percentile(Dataset,percentile,window,Dates,Temperature_Record_Title[1],CDP_Time_In_Focus[0],CDP_Time_In_Focus[1],'Temp Min')
+    CDP = pd.concat([CDP_Max[date_name],CDP_Max['Temp Max'],CDP_Min['Temp Min']],axis=1) #Change the name
 
 
 
+    '''Now to put all the heatwave values together to get the 3 Max 2 Min heatwave definition'''
+    Heatwave_Max, EHF_Max = Perth_Heatwaves_Max_Or_Min(Is_Max_T[0],Data_not_expand,date_name,Time_In_Focus[0] ,Time_In_Focus[1] ,Temperature_Record_Title[0],CDP_Max,'Temp Max')
+    Heatwave_Min, EHF_Min = Perth_Heatwaves_Max_Or_Min(Is_Max_T[1],Data_not_expand,date_name,Time_In_Focus[0] ,Time_In_Focus[1] ,Temperature_Record_Title[1],CDP_Min,'Temp Min')	
 
 
+    Heatwave_Full_Dataset=  Proper_Heatwaves_Perth(Dataset,  Heatwave_Max,  Heatwave_Min,  date_name)
+    
+    return(Heatwave_Full_Dataset,EHF_Max,EHF_Min, CDP)
+
+    #So 2 days only are occurring and I believe it is to do with the break 
+    #in the heatwave function, it is only occruing to the onset so i 
+    #believe there is some way i need to mainuplate the break function 
+    #value so it pulls it out.
+#%%
+def Excess_Heat_Factor_Function_v2(Data,date_title,Column_Name,CDP,CDPColumn_Name):
+    '''
+
+    Parameters
+    ----------
+    Data : True or False
+        It is already caterogised as False therefore to use it for Maximum Temperatures need to say True.
+
+    Returns
+    -------
+    The threshold in order to be a heatwave. Of heatwave events, not heatwaves that cause humans discomfort
+
+    '''
+    import numpy as np ,pandas as pd
+    #I want to see whether this has better accuracy for heatwaves???
+    
+    
+    Date_Value = [] #To match the EHF values to the date.
+    EHF = [] #Excess Heat Factor
+    EHIacc = [] #Excess Heat Index Acclimatised (Previous 32 days)
+    EHIsig = [] #Excess Heat Index Singificant (CDP value)
+
+    for dt in np.arange(Data.index[0]+33,len(Data)):
+        #----- Date Index -----#
+        Dates = Data[date_title].loc[dt]
+        #print(Dates)
+        #----- 3 day Mean -----#
+        mean_3_day = Data[Column_Name].loc[dt-2:dt].mean()
+        #print(mean_3_day)
+        # ----- 3 to 32 day mean ----#
+        mean_1_tp_30_day = Data[Column_Name].loc[dt-32:dt-3].mean()
+        #print(mean_3_tp_32_day)
+        #----EHI(accl.)----#
+        EHIacclim_single =  mean_3_day - mean_1_tp_30_day
+        #print(EHIacclim_single)
+        #----Tn CDP function----#
+        '''For that indivudal date we use the Date_Splitter to get the day and month out so we can find the CDP value'''
+        CDP_day = CDP[CDPColumn_Name].loc['2020-{}-{}'.format(Data['month'].loc[dt],Data['day'].loc[dt])]
+        
+        #------ EHI(sig.) ------#
+        EHIsig_single =  Data[Column_Name].loc[dt] -  CDP_day
+        
+        #----- EHF-----#
+        '''Now using the combination of the two EHI sig and acc we can now produce the EHF'''
+        EHF_single =  EHIacclim_single* EHIsig_single #degC^2
+        
+        '''Now with all the necassary information needed we can append it all together'''
+        Date_Value.append(Dates)
+        EHIacc.append(EHIacclim_single)
+        EHIsig.append(EHIsig_single)
+        EHF.append(EHF_single)
+        #print(EHIacc)
+    '''Putting all the vectors together'''
+    EHF = pd.DataFrame(EHF,columns=['Excess Heat Factor'])
+    EHIacc = pd.DataFrame(EHIacc,columns=['Excess Heat Index Acclimatised'])
+    EHIsig = pd.DataFrame(EHIsig,columns=['Excess Heat Index Significant'])
+    Date_Value = pd.DataFrame(Date_Value,columns=[date_title])
+   
+
+    EHFvect = pd.concat([Date_Value, EHIacc, EHIsig, EHF],axis=1)
+    Excess_Heat_Factor_Matrix = pd.merge(Data,EHFvect,how='right',on = [date_title])
+    
+    return(Excess_Heat_Factor_Matrix)
