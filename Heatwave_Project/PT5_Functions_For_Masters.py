@@ -736,6 +736,79 @@ def Proper_Heatwaves_Perth(Data,Heatwave_MaxT,Heatwave_MinT,date_name):
     return(Full_Heatwaves)
 
 
+#%%The Heatwaves Perth
+def Proper_Heatwaves_Perth_v2(Data,Heatwave_MaxT,Heatwave_MinT,date_name):
+    '''
+    Data: Dataframe
+        This is the daily maximum and minimum temperatures.
+    
+    Max_Heatwave: Dataframe
+        List of all heatwaves within the maxmimum temperature.
+    
+    Min_Heatwave: Dataframe
+        List of all heatwaves within the minimum temperature
+        
+    date_name: string
+        Name of column that you have for heatwave
+        
+    Output: Full_Heatwaves
+        This is the full heatwave list using the 3 max and 2 min definition of heatwaves. This only has the maximum and minimum, CDP,
+        and ... may have to add more.
+    
+    
+    
+    
+    
+    
+    
+    '''
+    import pandas as pd
+    
+    Max = Heatwave_MaxT
+    Min = Heatwave_MinT
+
+    Heatwave_Event = []
+    Heatwave_Event_Min = []
+    Heatwave_Event_Max = []
+    count = 1
+    ids = Max['id'].drop_duplicates( keep='first', inplace=False)
+
+    for i in ids:
+       #This extracts the id from the Max_Event
+       Max_Event = Max[Max['id']==i]
+       #Finds the days, months and years from the max event to match with the minimum event.
+       Max_E = Max_Event.reset_index()
+       start = Max_E['date'][0]
+       end_Check = Max_E['date'][2]
+       end = Max_E['date'][len(Max_E)-1]
+       #Gets the Min event to see it if it within the bounds of the max event, it is actually the criteria
+       #3 days and 2 nights,
+       Min_Event = Min.set_index('date')
+       Min_Event = Min_Event.loc[start:end_Check]
+       
+       
+       #Checks the percentage and number of days within the event. The percentage is later
+       
+       
+       Percent = 100*len(Min_Event)/len(Max_Event)
+       length = len(Min_Event)
+       #print((Percent,length))
+       
+       #Now extract the information for the period.
+       if(length >= 2):
+           Temperature = Data.set_index('date')
+           Temperature = Temperature.loc[start:end]
+           Temperature['id'] = [count] * len(Temperature)
+           count = count + 1
+           Heatwave_Event.append(Temperature)
+           
+    Full_Heatwaves = pd.concat(Heatwave_Event,axis=0)
+      
+    return(Full_Heatwaves)
+
+
+
+
 #%% THE HEATWAVE FUNCTION
 def Heatwave_Function_Perth(Dataset,date_name,Time_In_Focus, CDP_Time_In_Focus,Temperature_Record_Title,percentile,window,Dates):
     '''
@@ -794,9 +867,10 @@ def Heatwave_Function_Perth(Dataset,date_name,Time_In_Focus, CDP_Time_In_Focus,T
     Heatwave_Max, EHF_Max = Perth_Heatwaves_Max_Or_Min(Is_Max_T[0],Data_not_expand,date_name,Time_In_Focus[0] ,Time_In_Focus[1] ,Temperature_Record_Title[0],CDP_Max,'Temp Max')
     Heatwave_Min, EHF_Min = Perth_Heatwaves_Max_Or_Min(Is_Max_T[1],Data_not_expand,date_name,Time_In_Focus[0] ,Time_In_Focus[1] ,Temperature_Record_Title[1],CDP_Min,'Temp Min')	
 
-
-    Heatwave_Full_Dataset=  Proper_Heatwaves_Perth(Dataset,  Heatwave_Max,  Heatwave_Min,  date_name)
-    
+    #Old
+    #Heatwave_Full_Dataset=  Proper_Heatwaves_Perth(Dataset,  Heatwave_Max,  Heatwave_Min,  date_name)
+    #New
+    Heatwave_Full_Dataset=  Proper_Heatwaves_Perth_v2(Dataset,  Heatwave_Max,  Heatwave_Min,  date_name)
     return(Heatwave_Full_Dataset,EHF_Max,EHF_Min, CDP)
 
     #So 2 days only are occurring and I believe it is to do with the break 

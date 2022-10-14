@@ -193,6 +193,16 @@ print(Stats_Diff)
 
 #%%Now a dsitribution for the 90% and 95% 
 
+
+
+
+
+
+
+
+
+
+
 MaxT_1911_1940 = MaxT_Perth[366:11323]
 MaxT_1991_2020 =MaxT_Perth[29586:40543]
 #MaxT_1911_1940 = MaxT_Perth[304:821]
@@ -439,9 +449,13 @@ MaxT_1991_2020['year']=MaxT_1991_2020['date'].dt.year
 np.mean(Dist1)
 np.mean(Dist2)
 #%%minimum variant
+MinT_Perth =MinT_Perth.set_index('date')
+MaxT_Perth = MaxT_Perth.set_index('date')
 
-MinT_1911_1940 = MinT_Perth[304:821]
-MinT_1991_2020 =MinT_Perth[29524:30040]
+
+
+MinT_1911_1940 = MinT_Perth.loc['1920-01-01':'1930-04-01']
+MinT_1991_2020 =MinT_Perth['1920-01-01':'1929-12-01']
 
 MinT_1911_1940 = MinT_Perth[366:11323]
 MinT_1991_2020 =MinT_Perth[29586:40543]
@@ -493,7 +507,7 @@ xmin = min(min(Dist1),min(Dist2))
 xmax =max(max(Dist1),max(Dist2))
 
 import numpy as np
-from scipy.stats import norm,gamma,beta
+from scipy.stats import norm,gamma,beta,lognorm
 import matplotlib.pyplot as plt
 
 plt.figure(6)
@@ -547,3 +561,93 @@ plt.figure(11)
 plt.plot(x1, p2, 'k', linewidth=2,color ='black')
 plt.hist(Dist2, bins=30, density=True, alpha=0.3, color='b')
 plt.title('Perth Minimum Temperature Distribution (Nov-Mar) 1991-2020')
+
+
+
+#%% New distribution stuff with what I know now
+MaxT_Perth = MaxT_Perth.set_index('date')
+
+
+
+MaxT_1920 = MaxT_Perth.loc['1920-01-01':'1929-12-31']
+MaxT_2010 = MaxT_Perth.loc['2010-01-01':'2019-12-31']
+
+
+
+
+f1 = Fitter(MaxT_2010['maximum temperature (degC)'], distributions=['gamma', 'lognorm',  "beta","burr","norm"])
+f1.fit()
+f1.summary()
+print(f1.get_best(method = 'sumsquare_error'))
+Param1 = f1.fitted_param["beta"]
+f2 = Fitter(MaxT_1920['maximum temperature (degC)'], distributions=['gamma', 'lognorm',  "beta","burr","norm"])
+f2.fit()
+f2.summary()
+print(f2.get_best(method = 'sumsquare_error'))
+Param1 = f1.fitted_param["beta"]
+
+#Best is Gamma
+
+
+
+
+plt.figure(6)
+
+
+
+
+
+
+
+
+# Generate some data for this demonstration.
+
+# Fit a gamma distribution to the data:
+a1, a2, a3= gamma.fit(MaxT_2010['maximum temperature (degC)'])
+
+# Plot the histogram.
+plt.hist(MaxT_2010['maximum temperature (degC)'], bins=25, density=True, alpha=0.6, color='g')
+
+# Plot the PDF.
+xmax = MaxT_Perth['maximum temperature (degC)'].max()
+xmin = MaxT_Perth['maximum temperature (degC)'].min()
+#xmin, xmax = plt.xlim()
+x1 = np.linspace(xmin, xmax, 100)
+p1 = gamma.pdf(x1,a1,a2,a3)
+plt.plot(x1, p1, 'k', linewidth=2,color ='black',label = '1911-1940')
+#title = "Fit results: mu = %.2f,  std = %.2f" % (mu1, std1)
+#plt.title(title)
+
+
+
+
+
+# Fit a normal distribution to the data:
+a5, a6, a7 = gamma.fit(MaxT_1920['maximum temperature (degC)'])
+
+# Plot the histogram.
+plt.hist(MaxT_1920['maximum temperature (degC)'], bins=25, density=True, alpha=0.6, color='g')
+
+# Plot the PDF.
+
+p2 = gamma.pdf(x1,a5,a6,a7)
+plt.plot(x1, p2, 'k', linewidth=2,color ='red',label = '1991-2020')
+#title = "Fit results: mu = %.2f,  std = %.2f" % (mu1, std1)
+#plt.title(title)
+#plt.hist(Dist2, bins=25, density=True, alpha=0.6, color='g')
+plt.title('Perth Minimum Temperature Distribution (Nov-Mar)')
+plt.legend()
+
+from scipy.stats import gamma
+
+#Chnace above 40C
+Y_1920 = gamma.pdf(x = 25, a = a1,scale = a2, loc = a3)
+Y_2010 = gamma.pdf(x = 25, a = a5,scale = a6, loc = a7)
+
+
+
+
+print(Y_2010.pdf(40))
+print(gamma.pdf(x=2, a=2, scale=1, loc=0))
+
+
