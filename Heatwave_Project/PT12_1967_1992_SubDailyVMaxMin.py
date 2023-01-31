@@ -9,6 +9,7 @@ import matplotlib as mpl
 from scipy.stats import pearsonr
 
 
+
 #%% Load Data and generate the heatwave list
 
 
@@ -462,7 +463,7 @@ months_ind_for_plotter(3,PRO_SD_ES,'Mar')
 
 
 
-#%% Time to apply the extended summer to heatwaves
+|#%% Time to apply the extended summer to heatwaves
 
 #Heatwave_85 = Heatwave_85.set_index('date')
 #Delete the unwanted columns
@@ -781,3 +782,96 @@ plt.grid()
 plt.title('Difference Between Sub-Daily Averages of Heatwave Days and Extended Summer Days')
 plt.xlabel('24HR Time')
 plt.ylabel('Temperature (C)')
+
+
+#%% Example lets choose the 16th of December 1990
+
+#Max and Min
+PRO_Extremes  = Perth_Regional_Office.loc['1967':'1992']
+PRO_Extremes = pd.concat([  PRO_Extremes[PRO_Extremes.index.month==11], PRO_Extremes[PRO_Extremes.index.month==12], PRO_Extremes[PRO_Extremes.index.month==1], PRO_Extremes[PRO_Extremes.index.month==2], PRO_Extremes[PRO_Extremes.index.month==3],], axis = 0)
+Max = PRO_Extremes['PRO Max'].loc['1990-12-12']
+Min = PRO_Extremes['PRO Min'].loc['1990-12-12']
+
+
+
+PRO_9 = PRO_SD_9['9am Temperature'].loc['1990-12-12']
+
+PRO_12 = PRO_SD_12['12pm Temperature'].loc['1990-12-12'] 
+
+PRO_15 = PRO_SD_15['3pm Temperature'].loc['1990-12-12'] 
+
+PRO_18 = PRO_SD_18['6pm Temperature'].loc['1990-12-12'] 
+
+
+PRO_21 = PRO_SD_21['9pm Temperature'].loc['1990-12-12'] 
+
+
+
+PRO_0 = PRO_SD_0['12am Temperature'].loc['1990-12-12']
+
+PRO_3  = PRO_SD_3['3am Temperature'].loc['1990-12-12'] 
+
+
+PRO_6  = PRO_SD_6['6am Temperature'].loc['1990-12-12']
+
+TIMES = ['9am', '12pm', '3pm', '6pm', '9pm','12am','3am','6am']
+Titles_shortened = pd.Series(TIMES,name = 'Subdaily Time')
+
+Sub_Temp = [PRO_9,PRO_12,PRO_15,PRO_18,PRO_21,PRO_0,PRO_3,PRO_6]
+
+plt.scatter(Titles_shortened,Sub_Temp)
+plt.scatter()
+
+#%%
+
+PRO_Extremes  = Perth_Regional_Office.loc['1967':'1992']
+PRO_Extremes = pd.concat([  PRO_Extremes[PRO_Extremes.index.month==11], PRO_Extremes[PRO_Extremes.index.month==12], PRO_Extremes[PRO_Extremes.index.month==1], PRO_Extremes[PRO_Extremes.index.month==2], PRO_Extremes[PRO_Extremes.index.month==3],], axis = 0)
+Max = PRO_Extremes['PRO Max'].loc['1990-12-12']
+Min = PRO_Extremes['PRO Min'].loc['1990-12-13']
+print(Max,Min)
+
+
+PRO_9 = PRO_SD_9['9am Temperature'].loc['1990-12-12']
+
+PRO_12 = PRO_SD_12['12pm Temperature'].loc['1990-12-12'] 
+
+PRO_15 = PRO_SD_15['3pm Temperature'].loc['1990-12-12'] 
+
+PRO_18 = PRO_SD_18['6pm Temperature'].loc['1990-12-12'] 
+
+
+PRO_21 = PRO_SD_21['9pm Temperature'].loc['1990-12-12'] 
+
+
+
+PRO_0 = PRO_SD_0['12am Temperature'].loc['1990-12-13']
+
+PRO_3  = PRO_SD_3['3am Temperature'].loc['1990-12-13'] 
+
+
+PRO_6  = PRO_SD_6['6am Temperature'].loc['1990-12-13']
+
+PRO_92 = PRO_SD_9['9am Temperature'].loc['1990-12-13']
+
+Titles_shortened = ['9am', '12pm', '3pm', '6pm', '9pm','12am' ,'3am','6am', '9am ']
+
+Sub_Temp = [PRO_9,PRO_12,PRO_15,PRO_18,PRO_21,PRO_0,PRO_3,PRO_6, PRO_92]
+Max_Temp = [Max,Max,Max,Max,Max,Max,Max,Max,Max]
+Min_Temp = [Min,Min,Min,Min,Min,Min,Min,Min,Min]
+plt.scatter(Titles_shortened,Sub_Temp,label = 'Sub-daily',color = 'black')
+plt.plot(Titles_shortened,Max_Temp,label = 'Maximum',color ='red')
+
+plt.title('Temperatures from 9am 12/12/1990 to 9am 13/12/1990',fontsize = 14)
+plt.ylabel('Temperature (\N{DEGREE SIGN}C)',fontsize = 12)
+plt.plot(Titles_shortened,Min_Temp, label = 'Minimum',color = 'blue')
+plt.legend(loc=1)
+plt.ylim([25,41])
+
+#%%
+TIMES = ['9am', '12pm', '3pm', '6pm', '9pm','12am','3am','6am']
+Sub_Temp = [PRO_9,PRO_12,PRO_15,PRO_18,PRO_21,PRO_0,PRO_3,PRO_6]
+Max_Temp = [Max,Max,Max,Max,Max,Max,Max,Max]
+Min_Temp = [Min,Min,Min,Min,Min,Min,Min,Min]
+plt.scatter(Titles_shortened,Sub_Temp)
+
+plt.ylim([25,41])

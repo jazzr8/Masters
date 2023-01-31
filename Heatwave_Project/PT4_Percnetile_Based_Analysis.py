@@ -4,7 +4,8 @@ The percentile based stuff
 #%% PACKAGES
 import pandas as pd, numpy as np,matplotlib.pyplot as plt
 from scipy import stats
-
+import sys
+sys.path.append(r"C:\Users\jarra\Desktop\Masters\Heatwave_Project")
 
 #%% Load Data only using max Temperature for the initial start
 MaxT_Perth_Data = pd.read_csv(r"D:\LIBRARY\UNIVERSITY\Masters Research\Python\Data\tmax.009021.daily.csv")
@@ -235,12 +236,14 @@ Dist2 = Dist2['maximum temperature (degC)'][~np.isnan(Dist2['maximum temperature
 import numpy as np
 import pandas as pd
 import seaborn as sns
+from fitter import Fitter, get_common_distributions, get_distributionsimport seaborn as sns
 from fitter import Fitter, get_common_distributions, get_distributions
 f1 = Fitter(Dist1, distributions=['gamma', 'lognorm',  "beta","burr","norm"])
 f1.fit()
 f1.summary()
 f1.get_best(method = 'sumsquare_error')
 Param1 = f1.fitted_param["beta"]
+
 
 
 
@@ -297,7 +300,8 @@ p2 = beta.pdf(x1,a5,a6,a7,a8)
 plt.plot(x1, p2, 'k', linewidth=2,color ='red',label = '1991-2020')
 #title = "Fit results: mu = %.2f,  std = %.2f" % (mu1, std1)
 #plt.title(title)
-#plt.hist(Dist2, bins=25, density=True, alpha=0.6, color='g')
+#plt.hist(Dist2, bins=25, density=True, alpha=0.6, color='g'
+
 plt.title('Perth Maximum Temperature Distribution (Nov-Mar)')
 plt.legend()
 #In conclusion within the extended summer, the normal distubtion of maximum days has only shifted around 1.8C warmer with no change in variance.
@@ -451,7 +455,7 @@ np.mean(Dist2)
 #%%minimum variant
 MinT_Perth =MinT_Perth.set_index('date')
 MaxT_Perth = MaxT_Perth.set_index('date')
-
+#%%
 
 
 MinT_1911_1940 = MinT_Perth.loc['1920-01-01':'1930-04-01']
@@ -545,6 +549,8 @@ plt.plot(x1, p2, 'k', linewidth=2,color ='red',label = '1991-2020')
 #plt.title(title)
 #plt.hist(Dist2, bins=25, density=True, alpha=0.6, color='g')
 plt.title('Perth Minimum Temperature Distribution (Nov-Mar)')
+plt.xlabel('Temperature (\N{DEGREE SIGN}C)')
+plt.ylabel('PDF values')
 plt.legend()
 #In conclusion within the extended summer, the normal distubtion of maximum days has only shifted around 1.8C warmer with no change in variance.
 #This means that there is no indication that cold spells are getting colder and more extreme it is that the chance of a cold spell
@@ -566,21 +572,63 @@ plt.title('Perth Minimum Temperature Distribution (Nov-Mar) 1991-2020')
 
 #%% New distribution stuff with what I know now
 MaxT_Perth = MaxT_Perth.set_index('date')
+MinT_Perth = MinT_Perth.set_index('date')
+#%%
+
+#MaxT_Perth = Dist2.set_index('date')
 
 
 
 MaxT_1920 = MaxT_Perth.loc['1920-01-01':'1929-12-31']
+MaxT_1920 = MaxT_1920.reset_index()
+MaxT_1920['month']=MaxT_1920['date'].dt.month
+
+
+Dist1 = (MaxT_1920.loc[MaxT_1920['month']>=12])
+Dist22 =  MaxT_1920.loc[MaxT_1920['month']<=2]
+Dist2 = pd.concat([Dist1,Dist22]).sort_values(by=['date'], ascending=True)
+MaxT_1920 = Dist2['maximum temperature (degC)'][~np.isnan(Dist2['maximum temperature (degC)'])].values
+
+
+
+
+
+
 MaxT_2010 = MaxT_Perth.loc['2010-01-01':'2019-12-31']
 
 
+MaxT_2010 = MaxT_2010.reset_index()
+MaxT_2010['month']=MaxT_2010['date'].dt.month
 
 
-f1 = Fitter(MaxT_2010['maximum temperature (degC)'], distributions=['gamma', 'lognorm',  "beta","burr","norm"])
+Dist1 = (MaxT_2010.loc[MaxT_2010['month']>=12])
+Dist22 =  MaxT_2010.loc[MaxT_2010['month']<=2]
+Dist2 = pd.concat([Dist1,Dist22]).sort_values(by=['date'], ascending=True)
+MaxT_2010 = Dist2['maximum temperature (degC)'][~np.isnan(Dist2['maximum temperature (degC)'])].values
+
+
+#chc40more2010 = 100*len(MaxT_2010[MaxT_2010>=40])/len(MaxT_2010)
+#chc40more1920 = 100*len(MaxT_1920[MaxT_1920>=40])/len(MaxT_1920)
+#print(chc40more2010,chc40more1920)
+
+
+
+
+
+
+
+
+
+
+
+
+
+f1 = Fitter(MaxT_2010, distributions=['gamma', 'lognorm',  "beta","burr","norm"])
 f1.fit()
 f1.summary()
 print(f1.get_best(method = 'sumsquare_error'))
 Param1 = f1.fitted_param["beta"]
-f2 = Fitter(MaxT_1920['maximum temperature (degC)'], distributions=['gamma', 'lognorm',  "beta","burr","norm"])
+f2 = Fitter(MaxT_1920, distributions=['gamma', 'lognorm',  "beta","burr","norm"])
 f2.fit()
 f2.summary()
 print(f2.get_best(method = 'sumsquare_error'))
@@ -603,17 +651,35 @@ plt.figure(6)
 # Generate some data for this demonstration.
 
 # Fit a gamma distribution to the data:
-a1, a2, a3= gamma.fit(MaxT_2010['maximum temperature (degC)'])
+    
+fit_alpha, fit_loc, fit_beta = stats.gamma.fit(MaxT_2010)
+print(fit_alpha, fit_loc, fit_beta )
+
+gamma.ppf(40, fit_alpha,loc =fit_loc, scale = fit_beta)
+#fit_loc loccation of where the first point starts
+Temp1 = MaxT_2010
+chc40more = 100*len(Temp1[Temp1>=40])/len(Temp1)
+
+
+
+
+
+
+
+
+
+
+
 
 # Plot the histogram.
-plt.hist(MaxT_2010['maximum temperature (degC)'], bins=25, density=True, alpha=0.6, color='g')
+plt.hist(MaxT_2010, bins=25, density=True, alpha=0.6, color='g')
 
 # Plot the PDF.
 xmax = MaxT_Perth['maximum temperature (degC)'].max()
 xmin = MaxT_Perth['maximum temperature (degC)'].min()
 #xmin, xmax = plt.xlim()
 x1 = np.linspace(xmin, xmax, 100)
-p1 = gamma.pdf(x1,a1,a2,a3)
+#p1 = gamma.rsv(fit_alpha,fit_loc,fit_beta)
 plt.plot(x1, p1, 'k', linewidth=2,color ='black',label = '1911-1940')
 #title = "Fit results: mu = %.2f,  std = %.2f" % (mu1, std1)
 #plt.title(title)
@@ -624,7 +690,8 @@ plt.plot(x1, p1, 'k', linewidth=2,color ='black',label = '1911-1940')
 
 # Fit a normal distribution to the data:
 a5, a6, a7 = gamma.fit(MaxT_1920['maximum temperature (degC)'])
-
+Temp2 = MaxT_1920['maximum temperature (degC)']
+chc40more1920 = 100*len(Temp2[Temp2>=40])/len(Temp2)
 # Plot the histogram.
 plt.hist(MaxT_1920['maximum temperature (degC)'], bins=25, density=True, alpha=0.6, color='g')
 
@@ -638,7 +705,7 @@ plt.plot(x1, p2, 'k', linewidth=2,color ='red',label = '1991-2020')
 plt.title('Perth Minimum Temperature Distribution (Nov-Mar)')
 plt.legend()
 
-from scipy.stats import gamma
+from scipy.stats import gamma,burr
 
 #Chnace above 40C
 Y_1920 = gamma.pdf(x = 25, a = a1,scale = a2, loc = a3)
@@ -649,5 +716,190 @@ Y_2010 = gamma.pdf(x = 25, a = a5,scale = a6, loc = a7)
 
 print(Y_2010.pdf(40))
 print(gamma.pdf(x=2, a=2, scale=1, loc=0))
+
+chc40more2010 = 100*len(Temp1[Temp1>=40])/len(Temp1)
+chc40more1920 = 100*len(Temp2[Temp2>=40])/len(Temp2)
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+#%%
+#Load Data In
+MaxT_Perth_Data = pd.read_csv(r"D:\LIBRARY\UNIVERSITY\Masters Research\Python\Data\tmax.009021.daily.csv")
+MaxT_Perth = MaxT_Perth_Data.copy()
+MaxT_Perth = MaxT_Perth.drop(0)
+
+MaxT_Perth['date'] = pd.to_datetime(MaxT_Perth['date'],format="%d/%m/%Y")
+
+#Load Data only using min Temperature for the initial start
+MinT_Perth_Data = pd.read_csv(r"D:\LIBRARY\UNIVERSITY\Masters Research\Python\Data\tmin.009021.daily.csv")
+MinT_Perth = MinT_Perth_Data.copy()
+MinT_Perth = MinT_Perth.drop(0)
+
+MinT_Perth['date'] = pd.to_datetime(MinT_Perth['date'],format="%d/%m/%Y")
+
+MaxT_Perth = MaxT_Perth.set_index('date')
+MinT_Perth = MinT_Perth.set_index('date')
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+#%% Get Extended Summer only between 1920-1929 and 2010-2019
+
+
+#1920-1929
+MaxT_1920 = MaxT_Perth.loc['1920-01-01':'1929-12-31']
+MaxT_1920 = MaxT_1920.reset_index()
+MaxT_1920['month']=MaxT_1920['date'].dt.month
+
+Dist1 = (MaxT_1920.loc[MaxT_1920['month']>=12])
+Dist22 =  MaxT_1920.loc[MaxT_1920['month']<=2]
+MaxES1920 = pd.concat([Dist1,Dist22]).sort_values(by=['date'], ascending=True)
+MaxT_1920 = MaxES1920['maximum temperature (degC)'][~np.isnan(MaxES1920['maximum temperature (degC)'])].values
+
+MinT_1920 = MinT_Perth.loc['1920-01-01':'1929-12-31']
+MinT_1920 = MinT_1920.reset_index()
+MinT_1920['month']=MinT_1920['date'].dt.month
+
+Dist12 = (MinT_1920.loc[MinT_1920['month']>=12])
+Dist223 =  MinT_1920.loc[MinT_1920['month']<=2]
+MinES1920 = pd.concat([Dist12,Dist223]).sort_values(by=['date'], ascending=True)
+MinT_1920 = MinES1920['minimum temperature (degC)'][~np.isnan(MinES1920['minimum temperature (degC)'])].values
+
+
+#2010-2019
+MaxT_2010 = MaxT_Perth.loc['2010-01-01':'2019-12-31']
+MaxT_2010 = MaxT_2010.reset_index()
+MaxT_2010['month']=MaxT_2010['date'].dt.month
+
+
+Dist11 = (MaxT_2010.loc[MaxT_2010['month']>=12])
+Dist222 =  MaxT_2010.loc[MaxT_2010['month']<=2]
+MaxES2010 = pd.concat([Dist11,Dist222]).sort_values(by=['date'], ascending=True)
+MaxT_2010 = MaxES2010['maximum temperature (degC)'][~np.isnan(MaxES2010['maximum temperature (degC)'])].values
+
+MinT_2010 = MinT_Perth.loc['2010-01-01':'2019-12-31']
+MinT_2010 = MinT_2010.reset_index()
+MinT_2010['month']=MinT_2010['date'].dt.month
+
+
+Dist112 = (MinT_2010.loc[MinT_2010['month']>=12])
+Dist2223 =  MinT_2010.loc[MinT_2010['month']<=2]
+MinES2010 = pd.concat([Dist112,Dist2223]).sort_values(by=['date'], ascending=True)
+MinT_2010 = MinES2010['minimum temperature (degC)'][~np.isnan(MinES2010['minimum temperature (degC)'])].values
+
+
+
+#%%Get the distributions
+from scipy.stats import gamma,burr
+
+plt.figure(10)
+
+f1 = Fitter(MaxT_2010, distributions=['gamma', 'lognorm',  "beta","burr","norm"])
+f1.fit()
+f1.summary()
+print(f1.get_best(method = 'sumsquare_error'))
+a1, a2,a3,a4 = f1.fitted_param["beta"]
+
+
+
+f2 = Fitter(MaxT_1920, distributions=['gamma', 'lognorm',  "beta","burr","norm"])
+f2.fit()
+f2.summary()
+print(f2.get_best(method = 'sumsquare_error'))
+a5, a6,a7,a8 = f2.fitted_param["beta"]
+
+
+f3 = Fitter(MinT_2010, distributions=['gamma', 'lognorm',  "beta","burr","norm"])
+f3.fit()
+f3.summary()
+print(f3.get_best(method = 'sumsquare_error'))
+a9,a10,a11,a12 = f3.fitted_param["burr"]
+
+
+
+f4= Fitter(MinT_1920, distributions=['gamma', 'lognorm',  "beta","burr","norm"])
+f4.fit()
+f4.summary()
+print(f4.get_best(method = 'sumsquare_error'))
+a13,a14,a15,a16 = f4.fitted_param["beta"]
+
+#Plot them
+xmax = MaxT_Perth['maximum temperature (degC)'].max()
+xmin = MaxT_Perth['maximum temperature (degC)'].min()
+xmax2 = MinT_Perth['minimum temperature (degC)'].max()
+xmin2 = MinT_Perth['minimum temperature (degC)'].min()
+
+x1 = np.linspace(xmin, xmax, 100)
+x2 = np.linspace(xmin2, xmax2, 100)
+
+
+plt.figure(1)
+plt.hist(MaxT_2010, bins=25, density=True, alpha=0.6, color='y')
+plt.hist(MaxT_1920, bins=25, density=True, alpha=0.6, color='red')
+
+p1 = beta.pdf(x1,a1,a2,a3,a4)
+plt.plot(x1, p1, 'k', linewidth=2,color ='y',label = '2010-2019')
+
+
+p2 = beta.pdf(x1,a5,a6,a7,a8)
+plt.plot(x1, p2, 'k', linewidth=2,color ='red',label = '1920-1929')
+plt.legend()
+plt.title("Perth Maximum Temperature Distribution (Nov-Mar)",fontsize =14)
+plt.xlabel("Temperature (\N{DEGREE SIGN}C)",fontsize =12)
+plt.ylabel("Density",fontsize =12)
+plt.xlim([15,47])
+
+plt.figure(2)
+plt.hist(MinT_2010, bins=25, density=True, alpha=0.6, color='green')
+plt.hist(MinT_1920, bins=25, density=True, alpha=0.6, color='blue')
+
+p3 = burr.pdf(x2,a9,a10,a11,a12)
+plt.plot(x2, p3, 'k', linewidth=2,color ='green',label = '2010-2019')
+
+
+p4 = beta.pdf(x2,a13,a14,a15,a16)
+plt.plot(x2, p4, 'k', linewidth=2,color ='blue',label = '1920-1929')
+plt.legend()
+plt.title("Perth Minimum Temperature Distribution (Nov-Mar)",fontsize =14)
+plt.xlabel("Temperature (\N{DEGREE SIGN}C)",fontsize =12)
+plt.ylabel("Density",fontsize =12)
+plt.xlim([3,30])
+
+
+
+
+
+
+
+
 
 

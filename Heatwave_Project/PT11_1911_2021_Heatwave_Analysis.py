@@ -2,7 +2,7 @@ import sys
 
 
 sys.path.append(r"C:\Users\jarra\Desktop\Masters\Heatwave_Project")
-import pandas as pd, PT13_Functions_For_Masters_New_Test_Functions_For_Masters as function_M, matplotlib.pyplot as plt
+import pandas as pd, PT13_Functions_For_Masters_New_Test as function_M, matplotlib.pyplot as plt
 import pandas as pd
 import numpy as np
 import matplotlib as mpl
@@ -42,78 +42,73 @@ Daily_MaxMin = pd.concat([MaxT_Perth['date'],Maximum,Minimum,Average],axis=1)
 
 
 
-'''
-
-
-
-
 #%% Heatwave comparison
 
 
-Heatwave_80_old = function_M.Heatwave_Function_Perth(Daily_MaxMin,'date',[1911,2020], [1961,1990],['Max','Min'],80,7,Dates)
-Heatwave_80_new = function_M.Heatwave_Function_Perth(Daily_MaxMin,'date',[1911,2020], [1981,2010],['Max','Min'],80,7,Dates)
-Heatwave_80_sub = function_M.Heatwave_Function_Perth(Daily_MaxMin,'date',[1911,2020], [1994,2013],['Max','Min'],80,7,Dates)
+Heatwave_80_old, CDP_Max, EHF_Max, EHF_Min = function_M.Heatwave_Function_Perth_Specific(Daily_MaxMin,'date',[1911,2020], [1961,1990],['Max','Min'],80,7,Dates)
+Heatwave_80_new, CDP_Max, EHF_Max, EHF_Min  = function_M.Heatwave_Function_Perth_Specific(Daily_MaxMin,'date',[1911,2020], [1981,2010],['Max','Min'],80,7,Dates)
+Heatwave_80_sub, CDP_Max, EHF_Max, EHF_Min  = function_M.Heatwave_Function_Perth_Specific(Daily_MaxMin,'date',[1911,2020], [1994,2013],['Max','Min'],80,7,Dates)
 old_80_num =Heatwave_80_old['id'].max()
 new_80_num = Heatwave_80_new['id'].max()
 sub_80_num = Heatwave_80_sub['id'].max()
 
-Heatwave_825_old = function_M.Heatwave_Function_Perth(Daily_MaxMin,'date',[1911,2020], [1961,1990],['Max','Min'],82.5,7,Dates)
-Heatwave_825_new = function_M.Heatwave_Function_Perth(Daily_MaxMin,'date',[1911,2020], [1981,2010],['Max','Min'],82.5,7,Dates)
-Heatwave_825_sub = function_M.Heatwave_Function_Perth(Daily_MaxMin,'date',[1911,2020], [1994,2013],['Max','Min'],82.5,7,Dates)
+Heatwave_825_old, CDP_Max, EHF_Max, EHF_Min  = function_M.Heatwave_Function_Perth_Specific(Daily_MaxMin,'date',[1911,2020], [1961,1990],['Max','Min'],82.5,7,Dates)
+Heatwave_825_new, CDP_Max, EHF_Max, EHF_Min  = function_M.Heatwave_Function_Perth_Specific(Daily_MaxMin,'date',[1911,2020], [1981,2010],['Max','Min'],82.5,7,Dates)
+Heatwave_825_sub, CDP_Max, EHF_Max, EHF_Min  = function_M.Heatwave_Function_Perth_Specific(Daily_MaxMin,'date',[1911,2020], [1994,2013],['Max','Min'],82.5,7,Dates)
 old_825_num =Heatwave_825_old['id'].max()
 new_825_num =Heatwave_825_new['id'].max()
 sub_825_num = Heatwave_825_sub['id'].max()
 
-Heatwave_85_old = function_M.Heatwave_Function_Perth(Daily_MaxMin,'date',[1911,2020], [1961,1990],['Max','Min'],85,7,Dates)
-Heatwave_85_new = function_M.Heatwave_Function_Perth(Daily_MaxMin,'date',[1911,2020], [1981,2010],['Max','Min'],85,7,Dates)
-Heatwave_85_sub = function_M.Heatwave_Function_Perth(Daily_MaxMin,'date',[1911,2020], [1994,2013],['Max','Min'],85,7,Dates)
+Heatwave_85_old, CDP_Max, EHF_Max, EHF_Min  = function_M.Heatwave_Function_Perth_Specific(Daily_MaxMin,'date',[1911,2020], [1961,1990],['Max','Min'],85,7,Dates)
+Heatwave_85_new, CDP_Max, EHF_Max, EHF_Min  = function_M.Heatwave_Function_Perth_Specific(Daily_MaxMin,'date',[1911,2020], [1981,2010],['Max','Min'],85,7,Dates)
+Heatwave_85_sub, CDP_Max, EHF_Max, EHF_Min  = function_M.Heatwave_Function_Perth_Specific(Daily_MaxMin,'date',[1911,2020], [1994,2013],['Max','Min'],85,7,Dates)
 old_85_num = Heatwave_85_old['id'].max()
 new_85_num =Heatwave_85_new['id'].max()
 sub_85_num = Heatwave_85_sub['id'].max()
 
 
-Heatwave_875_old = function_M.Heatwave_Function_Perth(Daily_MaxMin,'date',[1911,2020], [1961,1990],['Max','Min'],87.5,7,Dates)
-Heatwave_875_new = function_M.Heatwave_Function_Perth(Daily_MaxMin,'date',[1911,2020], [1981,2010],['Max','Min'],87.5,7,Dates)
-Heatwave_875_sub = function_M.Heatwave_Function_Perth(Daily_MaxMin,'date',[1911,2020], [1994,2013],['Max','Min'],87.5,7,Dates)
+Heatwave_875_old, CDP_Max, EHF_Max, EHF_Min  = function_M.Heatwave_Function_Perth_Specific(Daily_MaxMin,'date',[1911,2020], [1961,1990],['Max','Min'],87.5,7,Dates)
+Heatwave_875_new, CDP_Max, EHF_Max, EHF_Min  = function_M.Heatwave_Function_Perth_Specific(Daily_MaxMin,'date',[1911,2020], [1981,2010],['Max','Min'],87.5,7,Dates)
+Heatwave_875_sub, CDP_Max, EHF_Max, EHF_Min  = function_M.Heatwave_Function_Perth_Specific(Daily_MaxMin,'date',[1911,2020], [1994,2013],['Max','Min'],87.5,7,Dates)
 old_875_num =Heatwave_875_old['id'].max()
 new_875_num =Heatwave_875_new['id'].max()
 sub_875_num = Heatwave_875_sub['id'].max()
 
 
-Heatwave_90_old = function_M.Heatwave_Function_Perth(Daily_MaxMin,'date',[1911,2020], [1961,1990],['Max','Min'],90,7,Dates)
-Heatwave_90_new = function_M.Heatwave_Function_Perth(Daily_MaxMin,'date',[1911,2020], [1981,2010],['Max','Min'],90,7,Dates)
-Heatwave_90_sub = function_M.Heatwave_Function_Perth(Daily_MaxMin,'date',[1911,2020], [1994,2013],['Max','Min'],90,7,Dates)
+Heatwave_90_old, CDP_Max, EHF_Max, EHF_Min  = function_M.Heatwave_Function_Perth_Specific(Daily_MaxMin,'date',[1911,2020], [1961,1990],['Max','Min'],90,7,Dates)
+Heatwave_90_new, CDP_Max, EHF_Max, EHF_Min  = function_M.Heatwave_Function_Perth_Specific(Daily_MaxMin,'date',[1911,2020], [1981,2010],['Max','Min'],90,7,Dates)
+Heatwave_90_sub, CDP_Max, EHF_Max, EHF_Min  = function_M.Heatwave_Function_Perth_Specific(Daily_MaxMin,'date',[1911,2020], [1994,2013],['Max','Min'],90,7,Dates)
 old_90_num =Heatwave_90_old['id'].max()
 new_90_num =Heatwave_90_new['id'].max()
 sub_90_num = Heatwave_90_sub['id'].max()
 
-Heatwave_925_old = function_M.Heatwave_Function_Perth(Daily_MaxMin,'date',[1911,2020], [1961,1990],['Max','Min'],92.5,7,Dates)
-Heatwave_925_new = function_M.Heatwave_Function_Perth(Daily_MaxMin,'date',[1911,2020], [1981,2010],['Max','Min'],92.5,7,Dates)
-Heatwave_925_sub = function_M.Heatwave_Function_Perth(Daily_MaxMin,'date',[1911,2020], [1994,2013],['Max','Min'],92.5,7,Dates)
+Heatwave_925_old, CDP_Max, EHF_Max, EHF_Min  = function_M.Heatwave_Function_Perth_Specific(Daily_MaxMin,'date',[1911,2020], [1961,1990],['Max','Min'],92.5,7,Dates)
+Heatwave_925_new, CDP_Max, EHF_Max, EHF_Min  = function_M.Heatwave_Function_Perth_Specific(Daily_MaxMin,'date',[1911,2020], [1981,2010],['Max','Min'],92.5,7,Dates)
+Heatwave_925_sub, CDP_Max, EHF_Max, EHF_Min  = function_M.Heatwave_Function_Perth_Specific(Daily_MaxMin,'date',[1911,2020], [1994,2013],['Max','Min'],92.5,7,Dates)
 old_925_num =Heatwave_925_old['id'].max()
 new_925_num =Heatwave_925_new['id'].max()
 sub_925_num = Heatwave_925_sub['id'].max()
 
 
-Heatwave_95_old = function_M.Heatwave_Function_Perth(Daily_MaxMin,'date',[1911,2020], [1961,1990],['Max','Min'],95,7,Dates)
-Heatwave_95_new = function_M.Heatwave_Function_Perth(Daily_MaxMin,'date',[1911,2020], [1981,2010],['Max','Min'],95,7,Dates)
-Heatwave_95_sub = function_M.Heatwave_Function_Perth(Daily_MaxMin,'date',[1911,2020], [1994,2013],['Max','Min'],95,7,Dates)
+Heatwave_95_old, CDP_Max, EHF_Max, EHF_Min  = function_M.Heatwave_Function_Perth_Specific(Daily_MaxMin,'date',[1911,2020], [1961,1990],['Max','Min'],95,7,Dates)
+Heatwave_95_new, CDP_Max, EHF_Max, EHF_Min  = function_M.Heatwave_Function_Perth_Specific(Daily_MaxMin,'date',[1911,2020], [1981,2010],['Max','Min'],95,7,Dates)
+Heatwave_95_sub, CDP_Max, EHF_Max, EHF_Min  = function_M.Heatwave_Function_Perth_Specific(Daily_MaxMin,'date',[1911,2020], [1994,2013],['Max','Min'],95,7,Dates)
 old_95_num =Heatwave_95_old['id'].max()
 new_95_num =Heatwave_95_new['id'].max()
 sub_95_num = Heatwave_95_sub['id'].max()
 
 
-Heatwave_975_old = function_M.Heatwave_Function_Perth(Daily_MaxMin,'date',[1911,2020], [1961,1990],['Max','Min'],97.5,7,Dates)
-Heatwave_975_new = function_M.Heatwave_Function_Perth(Daily_MaxMin,'date',[1911,2020], [1981,2010],['Max','Min'],97.5,7,Dates)
-#Heatwave_975_sub = function_M.Heatwave_Function_Perth(Daily_MaxMin,'date',[1911,2020], [1994,2013],['Max','Min'],97.5,7,Dates)
+Heatwave_975_old, CDP_Max, EHF_Max, EHF_Min  = function_M.Heatwave_Function_Perth_Specific(Daily_MaxMin,'date',[1911,2020], [1961,1990],['Max','Min'],97.5,7,Dates)
+Heatwave_975_new, CDP_Max, EHF_Max, EHF_Min  = function_M.Heatwave_Function_Perth_Specific(Daily_MaxMin,'date',[1911,2020], [1981,2010],['Max','Min'],97.5,7,Dates)
+Heatwave_975_sub, CDP_Max, EHF_Max, EHF_Min  = function_M.Heatwave_Function_Perth(Daily_MaxMin,'date',[1911,2020], [1994,2013],['Max','Min'],97.5,7,Dates)
 old_975_num =Heatwave_975_old['id'].max()
 new_975_num =Heatwave_975_new['id'].max()
-#sub_975_num = Heatwave_975_sub['id'].max()
+sub_975_num = Heatwave_975_sub['id'].max()
 
 #%% These dont have heatwave events.
-Heatwave_99_old = function_M.Heatwave_Function_Perth(Daily_MaxMin,'date',[1911,2020], [1961,1990],['Max','Min'],99,7,Dates)
-Heatwave_99_new = function_M.Heatwave_Function_Perth(Daily_MaxMin,'date',[1911,2020], [1981,2010],['Max','Min'],99,7,Dates)
-Heatwave_80_sub = function_M.Heatwave_Function_Perth(Daily_MaxMin,'date',[1911,2020], [1994,2013],['Max','Min'],80,7,Dates)
+Heatwave_99_old, CDP_Max, EHF_Max, EHF_Min  = function_M.Heatwave_Function_Perth_Specific(Daily_MaxMin,'date',[1911,2020], [1961,1990],['Max','Min'],99,7,Dates)
+Heatwave_99_new, CDP_Max, EHF_Max, EHF_Min  = function_M.Heatwave_Function_Perth_Specific(Daily_MaxMin,'date',[1911,2020], [1981,2010],['Max','Min'],99,7,Dates)
+Heatwave_80_sub, CDP_Max, EHF_Max, EHF_Min  = function_M.Heatwave_Function_Perth_Specific(Daily_MaxMin,'date',[1911,2020], [1994,2013],['Max','Min'],80,7,Dates)
 old_99_num =Heatwave_99_old['id'].max()
 new_99_num =Heatwave_99_new['id'].max()
 
@@ -138,8 +133,8 @@ print(weather_df.style.highlight_max())
 weather_df.export(df_styled,"mytable.png")
 
 #%% BOM and WMO CDP comparison
-WMO = function_M.Calendar_Day_Percentile(Daily_MaxMin,95,15,Dates,'Min',1981,2010)
-BOM = function_M.Calendar_Day_Percentile(Daily_MaxMin,95,15,Dates,'Min',1961,1991)
+WMO, CDP_Max, EHF_Max, EHF_Min  = function_M.Heatwave_Function_Perth_Specific(Daily_MaxMin,95,15,Dates,'Min',1981,2010)
+BOM, CDP_Max, EHF_Max, EHF_Min  = function_M.Heatwave_Function_Perth_Specific(Daily_MaxMin,95,15,Dates,'Min',1961,1991)
 #%%
 WMO_JM = WMO['Temp'].loc[0:90]
 WMO_ND = WMO['Temp'].loc[305:365]
@@ -162,18 +157,14 @@ plt.legend()
 
 #%%Agreed 85% percentile
 
-
-
-
-'''
-
 #%%
+
 '''
 PERTH REG TO PERTH ACORN SAT COMP 1967-1992
 Using the 1961-1990 dataset and a percentile of 85% moderate heatwaves and 90% for extreme heatwaves.
 '''
-Heatwave_85, EHF_Max_85, EHF_Min_85, CDP_85, HWMax  =  function_M.Heatwave_Function_Perth_Specific(Daily_MaxMin,'date',[1911,2020], [1961,1990],['Max','Min'],85,7,Dates)
-Heatwave_90, EHF_Max_90, EHF_Min_90, CDP_90  = function_M.Heatwave_Function_Perth(Daily_MaxMin,'date',[1911,2020], [1961,1990],['Max','Min'],90,7,Dates)
+Heatwave_85, CDP_85,  EHF_Max_85, EHF_Min_85   =  function_M.Heatwave_Function_Perth_Specific(Daily_MaxMin,'date',[1911,2020], [1961,1990],['Max','Min'],85,7,Dates)
+Heatwave_90, CDP_90, EHF_Max_90, EHF_Min_90  = function_M.Heatwave_Function_Perth_Specific(Daily_MaxMin,'date',[1911,2020], [1961,1990],['Max','Min'],90,7,Dates)
 
 
 
@@ -671,7 +662,8 @@ Heatwave_Table = pd.merge(left = Heatwave_Table,right  =Mean_Average,left_index=
 These are the scatterplots/distrbiutions for heatwave days in orange compared to days that are not heatwave days blue in 
 the extended SUMMER PERIOD NOV TO MARCH
 '''
-
+Heatwave_85_fixed,D,E,F = function_M.Heatwave_Function_Perth_Specific(Daily_MaxMin,'date',[1800,2030], 
+                                                                [1961,1990],['Max','Min'],85,7,Dates)
 
 
 

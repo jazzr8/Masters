@@ -74,7 +74,7 @@ def Heatwave_Function_Perth_Specific(Dataset,
     
     #Clean up data and make sure the format is correct
     # Apply datetime to the dataset    
-    Dataset[date_name] = pd.to_datetime(Dataset[date_name],format="%d/%m/%Y")
+    Dataset[date_name] = pd.to_datetime(Dataset[date_name],format="%Y/%m/%d")
     #Had to use 2 versions for the CDP and for the rest of the functions
     Data_not_expand = Dataset
     Dataset = Date_Splitter(Dataset, date_name)
@@ -139,7 +139,7 @@ def Heatwave_Function_Perth_Specific(Dataset,
     Perths_Heatwaves  = Heatwave_Table_Generator(Heatwave_Full_Dataset,EHF_Max,EHF_Min,CDP,percentile)
     
     
-    return(Perths_Heatwaves, CDP_Max )
+    return(Perths_Heatwaves, CDP_Max, EHF_Max, EHF_Min )
 
     #So 2 days only are occurring and I believe it is to do with the break 
     #in the heatwave function, it is only occruing to the onset so i 
@@ -244,7 +244,11 @@ def Calendar_Day_Percentile(Data,percentile,window,Dates,Column_Name,start_year,
     CDP['year']=CDP['date'].dt.year
     CDP['month']=CDP['date'].dt.month
     CDP['day']=CDP['date'].dt.day
-        
+    del CDP['year']
+    del CDP['day']
+    del CDP['month']
+    
+    
     return(CDP)
 
 #%%
@@ -668,7 +672,7 @@ In order from first column to last
 3. Date
 4. Max
 5. Min
-6. Ave
+6. Avg
 7. CDPmax
 8. CPDmin
 9. EHF Max
@@ -738,7 +742,7 @@ def Heatwave_Table_Generator(Heatwave_Full_Dataset,EHF_Max,EHF_Min,CDP,percentil
     del EHF_Max['Excess Heat Index Significant']
     del EHF_Max['Max']
     del EHF_Max['Min']
-    del EHF_Max['Ave']
+    del EHF_Max['Avg']
 
     del EHF_Min['year']
     del EHF_Min['month']
@@ -747,7 +751,7 @@ def Heatwave_Table_Generator(Heatwave_Full_Dataset,EHF_Max,EHF_Min,CDP,percentil
     del EHF_Min['Excess Heat Index Significant']
     del EHF_Min['Max']
     del EHF_Min['Min']
-    del EHF_Min['Ave']
+    del EHF_Min['Avg']
 
 
 
@@ -908,7 +912,7 @@ def Heatwave_Table_Generator(Heatwave_Full_Dataset,EHF_Max,EHF_Min,CDP,percentil
         '''Means of the Temperature'''
         Mean_Max = individal_heatwave['Max'].mean()
         Mean_Min = individal_heatwave['Min'].mean() 
-        Average_Mean = individal_heatwave['Ave'].mean() 
+        Average_Mean = individal_heatwave['Avg'].mean() 
         
         
         

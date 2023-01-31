@@ -165,7 +165,7 @@ Max_Min_Perth = pd.concat((MaxT_Perth['date'], MaxT_Perth['maximum temperature (
 Max_Min_Perth['date'] = pd.to_datetime(Max_Min_Perth['date'],format="%d/%m/%Y")
 
 #For the rolling I need to set all NaN values to -99999999 and so whenever a day uses a NaN value it becomes extremely negative and I can remove it.
-#Max_Min_Perth_NaN_To_Large = Max_Min_Perth.fillna(-9999999)
+Max_Min_Perth_NaN_To_Large = Max_Min_Perth.fillna(-9999999)
 #We know the lowest temperautee value is -2.2
 #Now in order to smooth the data out and create a tnx90 I am going to do 2 comparisons,
 #I plan to first do the rolling for 7 days and then the 15 days as KirkFITz has done herself.
@@ -351,7 +351,7 @@ plt.legend(['max7','min7','max15','min15','max30','min30'])
 #STEP 1
 Max = pd.concat((Max_Min_Perth['date'], Max_Min_Perth['maximum temperature (degC)']), axis = 1)
 Max['date'] = pd.to_datetime(Max['date'],dayfirst = True)
-mean_Max = Max.groupby([(Max.date.dt.month)='Month',(Max.date.dt.day)='Day']).mean()
+mean_Max = Max.groupby([(Max.date.dt.month)=='Month',(Max.date.dt.day)=='Day']).mean()
 mean_Max.plot()
 
 mean_Max['date'][1,1]    
@@ -364,8 +364,7 @@ Max['day']=Max['date'].dt.day
 
 mean_Max = Max.groupby(['month','day']).mean()
 mean_Max = Max.groupby(['month','day'])
-for groups in mean_Max:
-    print(groups)
+
 
 
 df_grouped=Max.pivot(index=('month','day'),rows = 'maximum temperature (degC)')
