@@ -16,7 +16,7 @@ This is used in the concatination process when the CDP is developed and other th
 that have the data disappear. Since the full 366 days need to be accounted for, 2020 was 
 the year I chose for this
 '''
-Dates = pd.read_csv(r"D:\LIBRARY\UNIVERSITY\Masters Research\Python\Data\Dates, includes feb 29.csv")
+Dates = pd.read_csv(r"E:\LIBRARY\UNIVERSITY\Masters Research\Python\Data\Dates, includes feb 29.csv")
 
 '''MaxT, MinT and finding AveT
 The max and min temperatures are found in the files but the ave needs to be the combination of the two for that day.
@@ -24,9 +24,9 @@ To make it easier we will combine all three into one file.
 
 '''
 #Max Temp, (drop(0) has dropped the 0th index, so it starts at 1)
-MaxT_Perth = pd.read_csv(r"D:\LIBRARY\UNIVERSITY\Masters Research\Python\Data\tmax.009021.daily.csv").drop(0)
+MaxT_Perth = pd.read_csv(r"E:\LIBRARY\UNIVERSITY\Masters Research\Python\Data\tmax.009021.daily.csv").drop(0)
 #Min Temp
-MinT_Perth = pd.read_csv(r"D:\LIBRARY\UNIVERSITY\Masters Research\Python\Data\tmin.009021.daily.csv").drop(0)
+MinT_Perth = pd.read_csv(r"E:\LIBRARY\UNIVERSITY\Masters Research\Python\Data\tmin.009021.daily.csv").drop(0)
 #Ave Temp
 AveT_Perth = (MaxT_Perth['maximum temperature (degC)']+MinT_Perth['minimum temperature (degC)'])/2
 
@@ -43,6 +43,8 @@ Daily_MaxMin = pd.concat([MaxT_Perth['date'],Maximum,Minimum,Average],axis=1)
 PERTH REG TO PERTH ACORN SAT COMP 1967-1992
 Using the 1961-1990 dataset and a percentile of 85% moderate heatwaves and 90% for extreme heatwaves.
 '''
+
+Daily_MaxMin['date'] = pd.to_datetime(Daily_MaxMin['date'],format="%d/%m/%Y")
 #%%
 Heatwave_85, CDP, EHF_Max, EHF_Min  =  function_M.Heatwave_Function_Perth_Specific(Daily_MaxMin,'date',[1800,2030], [1961,1990],['Max','Min'],85,7,Dates)
 
@@ -50,7 +52,13 @@ Heatwave_85, CDP, EHF_Max, EHF_Min  =  function_M.Heatwave_Function_Perth_Specif
 '''
 I do not care about the other columns in this, so I can about the heatwave dates only.
 '''
+
+
+
+
+
 #%%
+
 #Only looking at 1911-2020
 
 #So first make the list of decadal years

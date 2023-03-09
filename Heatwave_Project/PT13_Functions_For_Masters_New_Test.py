@@ -742,7 +742,7 @@ def Heatwave_Table_Generator(Heatwave_Full_Dataset,EHF_Max,EHF_Min,CDP,percentil
     del EHF_Max['Excess Heat Index Significant']
     del EHF_Max['Max']
     del EHF_Max['Min']
-    del EHF_Max['Avg']
+    del EHF_Max['Ave']
 
     del EHF_Min['year']
     del EHF_Min['month']
@@ -751,7 +751,7 @@ def Heatwave_Table_Generator(Heatwave_Full_Dataset,EHF_Max,EHF_Min,CDP,percentil
     del EHF_Min['Excess Heat Index Significant']
     del EHF_Min['Max']
     del EHF_Min['Min']
-    del EHF_Min['Avg']
+    del EHF_Min['Ave']
 
 
 
@@ -912,7 +912,7 @@ def Heatwave_Table_Generator(Heatwave_Full_Dataset,EHF_Max,EHF_Min,CDP,percentil
         '''Means of the Temperature'''
         Mean_Max = individal_heatwave['Max'].mean()
         Mean_Min = individal_heatwave['Min'].mean() 
-        Average_Mean = individal_heatwave['Avg'].mean() 
+        Average_Mean = individal_heatwave['Ave'].mean() 
         
         
         
